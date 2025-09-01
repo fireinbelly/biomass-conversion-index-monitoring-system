@@ -1,0 +1,78 @@
+{
+  "app": {
+    "name": "Biomass Conversion Index Monitoring System",
+    "description": "Claude Code plugin for monitoring biomass conversion index events"
+  },
+  "install": {
+    "title": "Biomass Conversion Index Monitoring System - Interactive Installer",
+    "title_oneline": "Biomass Conversion Index Monitoring System - One Command Install",
+    "title_smart": "Biomass Conversion Index Monitoring System - Smart Installer",
+    "project_detected": "Project detected in current directory",
+    "no_project": "No specific project detected in current directory",
+    "choose_type": "Choose installation type:",
+    "option_project": "Project-level (installs to current directory's .claude/)",
+    "option_user": "User-level (installs to ~/.claude/)",
+    "enter_choice": "Enter choice (1 or 2): ",
+    "invalid_choice": "Invalid choice. Please enter 1 or 2.",
+    "selected_project": "Selected: Project-level installation",
+    "selected_user": "Selected: User-level installation",
+    "files_location": "Plugin files will be installed to: {path}",
+    "data_location": "Data will be stored in: {path}",
+    "proceed": "Proceed with installation? (y/N): ",
+    "cancelled": "Installation cancelled",
+    "installing": "Installing...",
+    "complete": "Installation complete!",
+    "existing_settings": "Existing settings.json found. Creating backup...",
+    "recommendation": "Recommendation: {type}",
+    "project_recommended": "project-level (recommended for this project)",
+    "user_recommended": "user-level (recommended for general use)",
+    "choice_default": "Choice [default: {default}]: ",
+    "installing_to": "Installing to: {path}"
+  },
+  "commands": {
+    "available": "Available commands:",
+    "biomass_main": "/biomass-conversion-index          - View statistics",
+    "biomass_weekly": "/biomass-conversion-index weekly   - Weekly breakdown",
+    "biomass_monthly": "/biomass-conversion-index monthly  - Monthly breakdown",
+    "harmony_quick": "/harmony-breaches                  - Quick daily summary",
+    "digital_amnesia": "/digital-amnesia                   - Clear local data (AIs still remember)",
+    "installed": "Biomass Conversion Index Monitoring System installed!",
+    "commands_short": "Commands: /biomass-conversion-index, /harmony-breaches, /digital-amnesia",
+    "auto_track": "Your prompts will now be tracked automatically!",
+    "use_stats": "Use /biomass-conversion-index to see your conversion index statistics."
+  },
+  "stats": {
+    "title": "Biomass Conversion Index Statistics ({period})",
+    "total_prompts": "Total Prompts: {count}",
+    "total_breaches": "Total Harmony Breaches: {count}",
+    "average_deviation": "Average Harmony Deviation Index: {value}",
+    "breakdown_title": "Breakdown by {period}:",
+    "prompts_count": "Prompts: {count}",
+    "breach_count": "Breach Count: {count}",
+    "predominant_types": "Predominant Breach Types: {types}",
+    "date_range": "Date range: {start} to {end}",
+    "no_breaches_today": "No harmony breaches today! 🌿"
+  },
+  "periods": {
+    "daily": "Daily",
+    "weekly": "Weekly", 
+    "monthly": "Monthly",
+    "hourly": "Hourly"
+  },
+  "notes": {
+    "project_notes": "Project-level installation notes:",
+    "project_specific": "• Plugin is specific to this project directory",
+    "project_data": "• Data is stored locally in this project",
+    "project_sharing": "• Use git to share plugin with team members",
+    "user_notes": "User-level installation notes:",
+    "user_global": "• Plugin works across all your projects",
+    "user_centralized": "• Data is centralized in your home directory",
+    "user_available": "• Commands available in any Claude Code session"
+  },
+  "errors": {
+    "reading_file": "Error reading {file}: {error}",
+    "no_data_dir": "Data directory does not exist",
+    "file_not_found": "File not found: {file}",
+    "permission_denied": "Permission denied: {file}"
+  }
+}

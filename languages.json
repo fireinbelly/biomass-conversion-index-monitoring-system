@@ -1,0 +1,59 @@
+{
+  "available_languages": [
+    {
+      "code": "en",
+      "name": "English",
+      "native_name": "English",
+      "flag": "🇺🇸",
+      "status": "complete"
+    },
+    {
+      "code": "es",
+      "name": "Spanish",
+      "native_name": "Español",
+      "flag": "🇪🇸", 
+      "status": "planned"
+    },
+    {
+      "code": "fr",
+      "name": "French",
+      "native_name": "Français",
+      "flag": "🇫🇷",
+      "status": "planned"
+    },
+    {
+      "code": "pt",
+      "name": "Portuguese",
+      "native_name": "Português",
+      "flag": "🇵🇹",
+      "status": "planned"
+    },
+    {
+      "code": "de",
+      "name": "German", 
+      "native_name": "Deutsch",
+      "flag": "🇩🇪",
+      "status": "planned"
+    },
+    {
+      "code": "zh",
+      "name": "Chinese",
+      "native_name": "中文",
+      "flag": "🇨🇳",
+      "status": "planned"
+    }
+  ],
+  "default_language": "en",
+  "fallback_language": "en",
+  "auto_detect": true,
+  "config": {
+    "note": "Update this file to add/remove languages or change settings",
+    "status_values": ["complete", "partial", "planned", "disabled"],
+    "instructions": {
+      "add_language": "Add new language object to available_languages array",
+      "remove_language": "Set status to 'disabled' or remove from array", 
+      "change_default": "Update default_language code",
+      "disable_autodetect": "Set auto_detect to false"
+    }
+  }
+}

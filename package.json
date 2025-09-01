@@ -1,0 +1,30 @@
+{
+  "name": "biomass-conversion-index",
+  "version": "1.0.0",
+  "description": "Claude Code plugin for monitoring biomass conversion index events",
+  "main": "install.js",
+  "bin": {
+    "biomass-conversion-index": "./install.js"
+  },
+  "scripts": {
+    "install": "node install.js"
+  },
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "biomass",
+    "conversion",
+    "monitoring"
+  ],
+  "author": "FatCouple OÜ",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fireinbelly/biomass-conversion-index-monitoring-system.git"
+  },
+  "homepage": "https://fireinbelly.com",
+  "license": "MIT",
+  "preferGlobal": true,
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
