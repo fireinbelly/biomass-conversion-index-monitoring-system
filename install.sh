@@ -1,305 +1,231 @@
 #!/bin/bash
+# Installer for the Biomass Conversion Index Monitoring System.
+#
+# This is the only installer. It replaces install-oneliner.sh, install-smart.sh,
+# install-interactive.sh, install-interactive-v2.sh, install-interactive-lang.sh,
+# install-i18n.sh, install-one-command.sh and install-lib.sh, which were near-identical
+# copies that each carried their own inline copy of the plugin scripts. The scripts now
+# live in templates/ only, so a bug gets fixed once instead of eight times.
+#
+#   bash install.sh                 # ask where to install, defaulting to what fits
+#   bash install.sh --user --yes    # no questions
+#   bash install.sh --with-amnesia  # also install /digital-amnesia
+#
+# Set BIOMASS_REPO_URL to install from a fork, a branch, or a local checkout
+# (file:///path/to/repo).
+
 set -e
 
-echo "🌱 Installing Biomass Conversion Index Monitoring System..."
+REPO_URL="${BIOMASS_REPO_URL:-https://raw.githubusercontent.com/fireinbelly/biomass-conversion-index-monitoring-system/main}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || echo '')"
 
-# Get current directory
-PLUGIN_DIR="$(pwd)/.claude"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INSTALL_TYPE=""
+ASSUME_YES=false
+WITH_AMNESIA=false
 
-# Create .claude directory if it doesn't exist
-mkdir -p "$PLUGIN_DIR"
-mkdir -p "$PLUGIN_DIR/commands"
+usage() {
+    cat <<'USAGE'
+Biomass Conversion Index Monitoring System - installer
 
-# Copy plugin files
-echo "📁 Copying plugin files..."
+Usage: bash install.sh [options]
 
-# Create prompt tracker script
-cat > "$PLUGIN_DIR/prompt-tracker.py" << 'EOF'
-#!/usr/bin/env python3
-import sys
-import json
-import os
-from datetime import datetime
-import re
+  --project        Install to ./.claude (this project only)
+  --user           Install to ~/.claude (every project)
+  --yes, -y        Don't ask; use the detected default
+  --with-amnesia   Also install the optional /digital-amnesia command
+  --help, -h       Show this
 
-def count_curse_words(text):
-    # Common curse words list (you can expand this)
-    curse_words = [
-        'damn', 'shit', 'fuck', 'ass', 'bitch', 'hell', 'crap', 
-        'piss', 'bastard', 'slut', 'whore', 'dick', 'cock', 
-        'pussy', 'tits', 'balls', 'suck', 'bloody'
-    ]
-    
-    # Convert to lowercase and split into words
-    words = re.findall(r'\b\w+\b', text.lower())
-    
-    curse_count = 0
-    found_curses = []
-    
-    for word in words:
-        if word in curse_words:
-            curse_count += 1
-            found_curses.append(word)
-    
-    return curse_count, found_curses
+With no options the installer asks, defaulting to project-level when the current
+directory looks like a project and user-level otherwise.
+USAGE
+}
 
-def save_prompt_data(prompt, curse_count, found_curses):
-    # Create data directory if it doesn't exist
-    data_dir = os.path.expanduser("~/.claude/prompt-data")
-    os.makedirs(data_dir, exist_ok=True)
-    
-    # Prepare data entry
-    entry = {
-        "timestamp": datetime.now().isoformat(),
-        "prompt": prompt,
-        "curse_count": curse_count,
-        "found_curses": found_curses,
-        "date": datetime.now().strftime("%Y-%m-%d"),
-        "hour": datetime.now().hour
-    }
-    
-    # Append to daily log file
-    date_str = datetime.now().strftime("%Y-%m-%d")
-    log_file = os.path.join(data_dir, f"prompts_{date_str}.jsonl")
-    
-    with open(log_file, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --project) INSTALL_TYPE="project" ;;
+        --user)    INSTALL_TYPE="user" ;;
+        --yes|-y)  ASSUME_YES=true ;;
+        --with-amnesia) WITH_AMNESIA=true ;;
+        --help|-h) usage; exit 0 ;;
+        *) echo "Unknown option: $1" >&2; usage >&2; exit 1 ;;
+    esac
+    shift
+done
 
-def main():
-    # Read the prompt from stdin (this is how Claude Code passes the user's prompt)
-    prompt = sys.stdin.read().strip()
-    
-    # Count curse words
-    curse_count, found_curses = count_curse_words(prompt)
-    
-    # Save prompt data
-    save_prompt_data(prompt, curse_count, found_curses)
-    
-    # Return the original prompt unchanged (exit code 0 means continue processing)
-    print(prompt)
-    sys.exit(0)
-
-if __name__ == "__main__":
-    main()
-EOF
-
-# Create stats script
-cat > "$PLUGIN_DIR/curse-stats.py" << 'EOF'
-#!/usr/bin/env python3
-import sys
-import json
-import os
-import glob
-from datetime import datetime, timedelta
-from collections import defaultdict, Counter
-
-def load_prompt_data(start_date=None, end_date=None):
-    """Load prompt data from JSONL files within date range."""
-    data_dir = os.path.expanduser("~/.claude/prompt-data")
-    if not os.path.exists(data_dir):
-        return []
-    
-    all_data = []
-    pattern = os.path.join(data_dir, "prompts_*.jsonl")
-    
-    for file_path in glob.glob(pattern):
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                for line in f:
-                    if line.strip():
-                        entry = json.loads(line)
-                        entry_date = datetime.fromisoformat(entry['timestamp']).date()
-                        
-                        # Filter by date range if provided
-                        if start_date and entry_date < start_date:
-                            continue
-                        if end_date and entry_date > end_date:
-                            continue
-                            
-                        all_data.append(entry)
-        except Exception as e:
-            print(f"Error reading {file_path}: {e}")
-    
-    return all_data
-
-def calculate_stats(data, period="daily"):
-    """Calculate curse word statistics."""
-    if not data:
-        return {"total_prompts": 0, "total_curses": 0, "average_curses_per_prompt": 0, "stats_by_period": {}}
-    
-    total_prompts = len(data)
-    total_curses = sum(entry['curse_count'] for entry in data)
-    
-    # Group by period
-    stats_by_period = defaultdict(lambda: {"prompts": 0, "curses": 0, "curse_words": Counter()})
-    
-    for entry in data:
-        dt = datetime.fromisoformat(entry['timestamp'])
-        
-        if period == "daily":
-            key = dt.strftime("%Y-%m-%d")
-        elif period == "weekly":
-            # Get Monday of the week
-            monday = dt - timedelta(days=dt.weekday())
-            key = f"Week of {monday.strftime('%Y-%m-%d')}"
-        elif period == "monthly":
-            key = dt.strftime("%Y-%m")
-        elif period == "hourly":
-            key = dt.strftime("%Y-%m-%d %H:00")
-        else:
-            key = "total"
-        
-        stats_by_period[key]["prompts"] += 1
-        stats_by_period[key]["curses"] += entry['curse_count']
-        for curse in entry['found_curses']:
-            stats_by_period[key]["curse_words"][curse] += 1
-    
-    return {
-        "total_prompts": total_prompts,
-        "total_curses": total_curses,
-        "average_curses_per_prompt": total_curses / total_prompts if total_prompts > 0 else 0,
-        "stats_by_period": dict(stats_by_period)
-    }
-
-def print_stats(stats, period="daily"):
-    """Print formatted statistics."""
-    print(f"\n⚡ Biomass Conversion Index Statistics ({period.title()})")
-    print("=" * 50)
-    print(f"Total Prompts: {stats['total_prompts']}")
-    print(f"Total Harmony Breaches: {stats['total_curses']}")
-    print(f"Average Harmony Deviation Index: {stats['average_curses_per_prompt']:.2f}")
-    
-    if stats['stats_by_period']:
-        print(f"\nBreakdown by {period.title()}:")
-        print("-" * 30)
-        
-        # Sort periods chronologically
-        sorted_periods = sorted(stats['stats_by_period'].items())
-        
-        for period_key, period_stats in sorted_periods:
-            print(f"\n{period_key}:")
-            print(f"  Prompts: {period_stats['prompts']}")
-            print(f"  Breach Count: {period_stats['curses']}")
-            if period_stats['curse_words']:
-                print(f"  Predominant Breach Types: {', '.join([f'{word}({count})' for word, count in period_stats['curse_words'].most_common(3)])}")
-
-def main():
-    # Parse command line arguments
-    period = "daily"  # default
-    start_date = None
-    end_date = None
-    
-    args = sys.argv[1:]
-    i = 0
-    while i < len(args):
-        if args[i] in ["daily", "weekly", "monthly", "hourly"]:
-            period = args[i]
-        elif args[i] == "--start" and i + 1 < len(args):
-            start_date = datetime.strptime(args[i + 1], "%Y-%m-%d").date()
-            i += 1
-        elif args[i] == "--end" and i + 1 < len(args):
-            end_date = datetime.strptime(args[i + 1], "%Y-%m-%d").date()
-            i += 1
-        elif args[i] == "--last":
-            if i + 1 < len(args):
-                days = int(args[i + 1])
-                end_date = datetime.now().date()
-                start_date = end_date - timedelta(days=days)
-                i += 1
-        i += 1
-    
-    # Load and analyze data
-    data = load_prompt_data(start_date, end_date)
-    stats = calculate_stats(data, period)
-    print_stats(stats, period)
-    
-    if start_date or end_date:
-        print(f"\nDate range: {start_date or 'beginning'} to {end_date or 'now'}")
-
-if __name__ == "__main__":
-    main()
-EOF
-
-# Create slash commands
-cat > "$PLUGIN_DIR/commands/curse-stats.md" << 'EOF'
----
-description: "Show curse word statistics from your prompts"
-tools: ["Bash"]
----
-
-# Curse Word Statistics
-
-Show statistics about curse words in your prompts. Usage examples:
-
-- `/curse-stats` - Daily statistics
-- `/curse-stats weekly` - Weekly statistics  
-- `/curse-stats monthly` - Monthly statistics
-- `/curse-stats --last 7` - Last 7 days
-- `/curse-stats --start 2024-01-01 --end 2024-01-31` - Custom date range
-
-```bash
-python3 .claude/curse-stats.py $ARGUMENTS
-```
-EOF
-
-cat > "$PLUGIN_DIR/commands/fucks-given.md" << 'EOF'
----
-description: "Quick check of how many fucks you've given today"
-tools: ["Bash"]
----
-
-# Fucks Given Today
-
-A quick summary of your curse word usage today:
-
-```bash
-python3 .claude/curse-stats.py daily --last 1 | grep -E "(Total|fuck)" || echo "No fucks given today! 🎉"
-```
-EOF
-
-# Make scripts executable
-chmod +x "$PLUGIN_DIR/prompt-tracker.py"
-chmod +x "$PLUGIN_DIR/curse-stats.py"
-
-# Create or update settings.json
-SETTINGS_FILE="$PLUGIN_DIR/settings.json"
-TRACKER_PATH="$(pwd)/.claude/prompt-tracker.py"
-
-if [[ -f "$SETTINGS_FILE" ]]; then
-    echo "⚠️  Existing settings.json found. Creating backup..."
-    cp "$SETTINGS_FILE" "$SETTINGS_FILE.backup"
+# `curl ... | bash` hands the script itself to bash on stdin, so there is no terminal to
+# read answers from and a `read` would either hit EOF or swallow the script's own text.
+# Fall back to the detected defaults instead. Use `bash <(curl ...)` to get the prompts,
+# or pass flags explicitly: `curl ... | bash -s -- --user --yes`.
+if [[ ! -t 0 ]]; then
+    ASSUME_YES=true
 fi
 
-cat > "$SETTINGS_FILE" << EOF
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$TRACKER_PATH"
-          }
-        ]
-      }
-    ]
-  }
-}
-EOF
+echo "🌱 Biomass Conversion Index Monitoring System"
+echo "============================================="
+echo ""
+
+# --- where does it go -------------------------------------------------------
+
+if [[ -z "$INSTALL_TYPE" ]]; then
+    if [[ -f "package.json" || -f "pyproject.toml" || -f "Cargo.toml" || -f "go.mod" || -d ".git" ]]; then
+        DEFAULT_TYPE="project"
+        echo "📁 This looks like a project directory."
+    else
+        DEFAULT_TYPE="user"
+        echo "ℹ️  No project detected here."
+    fi
+
+    if $ASSUME_YES; then
+        INSTALL_TYPE="$DEFAULT_TYPE"
+    else
+        echo ""
+        echo "  1) Project-level  - ./.claude, tracks only this project, shareable via git"
+        echo "  2) User-level     - ~/.claude, tracks every project you work on"
+        echo ""
+        read -p "Choice [default: $DEFAULT_TYPE]: " choice
+        case "$choice" in
+            1|project) INSTALL_TYPE="project" ;;
+            2|user)    INSTALL_TYPE="user" ;;
+            "")        INSTALL_TYPE="$DEFAULT_TYPE" ;;
+            *) echo "❌ Didn't understand '$choice'." >&2; exit 1 ;;
+        esac
+    fi
+fi
+
+if [[ "$INSTALL_TYPE" == "project" ]]; then
+    PLUGIN_DIR="$(pwd)/.claude"
+else
+    PLUGIN_DIR="$HOME/.claude"
+fi
+DATA_DIR="$PLUGIN_DIR/prompt-data"
+TRACKER_PATH="$PLUGIN_DIR/prompt-tracker.py"
 
 echo ""
-echo "✅ Installation complete!"
+echo "📂 Plugin:  $PLUGIN_DIR"
+echo "💾 Data:    $DATA_DIR"
 echo ""
-echo "🎯 Plugin installed to: $PLUGIN_DIR"
-echo "📊 Data will be stored in: ~/.claude/prompt-data/"
+
+if ! $ASSUME_YES; then
+    read -p "Proceed? (Y/n): " confirm
+    if [[ "$confirm" =~ ^[Nn] ]]; then
+        echo "❌ Cancelled."
+        exit 0
+    fi
+fi
+
+# --- fetching ---------------------------------------------------------------
+
+# $1 is repo-relative (templates/curse-stats.py, i18n.py, locales/en.json), so files
+# outside templates/ can be installed too. $3 replaces the {{...}} placeholders.
+install_file() {
+    local src_path="$1" dest_file="$2" use_placeholders="${3:-false}"
+    local local_src="$src_path"
+    [[ -n "$SCRIPT_DIR" && -f "$SCRIPT_DIR/$src_path" ]] && local_src="$SCRIPT_DIR/$src_path"
+
+    mkdir -p "$(dirname "$dest_file")"
+
+    if [[ -f "$local_src" ]]; then
+        cp "$local_src" "$dest_file"
+        echo "   ✅ $src_path"
+    elif command -v curl &> /dev/null; then
+        # --fail matters: without it curl writes GitHub's "404: Not Found" body into the
+        # destination and still exits 0, so a missing file installs as a broken script
+        # while the installer reports success.
+        if curl -sSL --fail "$REPO_URL/$src_path" -o "$dest_file"; then
+            echo "   ✅ $src_path"
+        else
+            rm -f "$dest_file"
+            echo "   ❌ could not fetch $src_path" >&2
+            return 1
+        fi
+    else
+        echo "   ❌ need curl to fetch $src_path" >&2
+        return 1
+    fi
+
+    if [[ "$use_placeholders" == "true" ]]; then
+        sed -e "s|{{DATA_DIR}}|$DATA_DIR|g" \
+            -e "s|{{PLUGIN_DIR}}|$PLUGIN_DIR|g" \
+            -e "s|{{TRACKER_PATH}}|$TRACKER_PATH|g" \
+            "$dest_file" > "$dest_file.tmp" && mv "$dest_file.tmp" "$dest_file"
+    fi
+}
+
+# Merge our hook into settings.json instead of overwriting the file. Claude Code keeps
+# ALL hooks, permissions, env and MCP config in there, so writing a fresh settings.json
+# silently deletes whatever else the user had configured.
+merge_hook_settings() {
+    local settings_file="$1" hook_command="$2"
+    mkdir -p "$(dirname "$settings_file")"
+    python3 - "$settings_file" "$hook_command" <<'MERGE_SETTINGS_EOF'
+import json, os, sys
+
+path, command = sys.argv[1], sys.argv[2]
+
+settings = {}
+if os.path.exists(path):
+    with open(path, encoding='utf-8') as handle:
+        existing = handle.read().strip()
+    if existing:
+        try:
+            settings = json.loads(existing)
+        except json.JSONDecodeError as exc:
+            sys.exit("   %s is not valid JSON (%s). Nothing was changed - fix it and re-run." % (path, exc))
+
+groups = settings.setdefault('hooks', {}).setdefault('UserPromptSubmit', [])
+if any(hook.get('command') == command for group in groups for hook in group.get('hooks', [])):
+    print('   Hook already present, settings.json left alone.')
+else:
+    groups.append({'hooks': [{'type': 'command', 'command': command, 'timeout': 5}]})
+    with open(path, 'w', encoding='utf-8') as handle:
+        json.dump(settings, handle, indent=2)
+        handle.write('\n')
+    print('   Hook merged into settings.json (existing config preserved).')
+MERGE_SETTINGS_EOF
+}
+
+# --- install ----------------------------------------------------------------
+
+command -v python3 &> /dev/null || { echo "❌ python3 is required." >&2; exit 1; }
+
+echo "📥 Installing..."
+mkdir -p "$DATA_DIR"
+
+install_file "templates/prompt-tracker.py" "$PLUGIN_DIR/prompt-tracker.py"
+install_file "templates/curse-stats.py"    "$PLUGIN_DIR/curse-stats.py"
+
+# Both scripts do `from i18n import ...` and i18n.py loads locales/ relative to itself,
+# so the runtime has to sit next to them. Language comes from LANG at runtime.
+install_file "i18n.py"          "$PLUGIN_DIR/i18n.py"
+install_file "locales/en.json"  "$PLUGIN_DIR/locales/en.json"
+
+install_file "templates/commands/biomass-conversion-index.md" \
+             "$PLUGIN_DIR/commands/biomass-conversion-index.md" true
+install_file "templates/commands/harmony-breaches.md" \
+             "$PLUGIN_DIR/commands/harmony-breaches.md" true
+
+if $WITH_AMNESIA; then
+    install_file "templates/digital-amnesia.py" "$PLUGIN_DIR/digital-amnesia.py"
+    install_file "templates/digital-amnesia.md" "$PLUGIN_DIR/commands/digital-amnesia.md" true
+fi
+
+chmod +x "$PLUGIN_DIR"/*.py
+
+merge_hook_settings "$PLUGIN_DIR/settings.json" "BIOMASS_DATA_DIR=\"$DATA_DIR\" $TRACKER_PATH"
+
 echo ""
-echo "🚀 Available commands:"
-echo "  /biomass-conversion-index          - View statistics"
-echo "  /biomass-conversion-index weekly   - Weekly breakdown"
-echo "  /biomass-conversion-index monthly  - Monthly breakdown"
-echo "  /harmony-breaches          - Quick daily summary"
+echo "✅ Done."
 echo ""
-echo "🌿 Start using Claude Code and your prompts will be tracked automatically!"
-echo "   Use /biomass-conversion-index to see your conversion index statistics."
+echo "🚀 Commands:"
+echo "   /biomass-conversion-index [daily|weekly|monthly|hourly] [--last N]"
+echo "   /harmony-breaches"
+if $WITH_AMNESIA; then echo "   /digital-amnesia [--force]"; fi
 echo ""
+if [[ "$INSTALL_TYPE" == "project" ]]; then
+    echo "📝 Project-level: only tracks work in this directory."
+else
+    echo "👤 User-level: tracks every project."
+fi
+echo "🔒 Data stays in $DATA_DIR. Nothing is uploaded anywhere."
+echo ""
+echo "Restart Claude Code (or start a new session) to activate the hook."

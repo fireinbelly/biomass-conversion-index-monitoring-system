@@ -70,20 +70,35 @@ Or don't. Your funeral. Well, not literally. Probably.
 
 ## Quick Install
 
-Look, I could give you three perfectly formatted installation options, but let's be real—you're going to use the first one that works.
+One installer. There used to be nine, which is exactly as good an idea as it sounds.
 
-### The One That Just Works™
 ```bash
-bash <(curl -sSL https://raw.githubusercontent.com/fireinbelly/biomass-conversion-index-monitoring-system/main/install-one-command.sh)
+bash <(curl -sSL https://raw.githubusercontent.com/fireinbelly/biomass-conversion-index-monitoring-system/main/install.sh)
 ```
-Interactive. Asks you questions. Holds your hand. Perfect.
 
-Want more control? Fine:
+Interactive. Asks where to put it, defaults to whatever fits. Note the `bash <(...)`
+rather than `curl | bash`: piping hands the *script* to bash on stdin, so there's no
+terminal left to read your answers from.
 
-**Smart Auto-Detect** (figures out what you need):
+Prefer no questions? Pass flags instead:
+
 ```bash
-curl -sSL https://raw.githubusercontent.com/fireinbelly/biomass-conversion-index-monitoring-system/main/install-smart.sh | bash
+curl -sSL https://raw.githubusercontent.com/fireinbelly/biomass-conversion-index-monitoring-system/main/install.sh | bash -s -- --user --yes
 ```
+
+| Flag | Effect |
+|------|--------|
+| `--project` | Install to `./.claude`, tracking only this project |
+| `--user` | Install to `~/.claude`, tracking everything |
+| `--yes`, `-y` | Don't ask, use the detected default |
+| `--with-amnesia` | Also install the optional `/digital-amnesia` command |
+| `--help` | The above, from the horse's mouth |
+
+With no flags and no terminal it falls back to the detected default rather than failing,
+so a plain `curl | bash` still does something sensible.
+
+Your existing `settings.json` is **merged**, not overwritten. Your other hooks,
+permissions and MCP config survive, and re-running the installer is idempotent.
 
 ## Installation Types (Because Choice Paralysis Wasn't Bad Enough)
 
@@ -218,20 +233,41 @@ Right, let's get technical for a second because this is still a README and we ha
     └── harmony-breaches.md         # Quick daily summary
 
 templates/                           # Template files (visible on GitHub)
-└── .claude/
-    ├── settings.json.template       # Hook configuration template
-    ├── prompt-tracker.py           # Prompt tracking script
-    ├── curse-stats.py              # Statistics script
-    └── commands/
-        ├── biomass-conversion-index.md # Main stats command template
-        └── harmony-breaches.md     # Quick daily summary template
-    ├── digital-amnesia.py          # The memory hole (optional)
-    └── digital-amnesia.md          # Local data purge command (optional)
+├── prompt-tracker.py               # Prompt tracking script
+├── curse-stats.py                  # Statistics script
+├── commands/
+│   ├── biomass-conversion-index.md # Main stats command template
+│   └── harmony-breaches.md         # Quick daily summary template
+├── digital-amnesia.py              # The memory hole (optional)
+└── digital-amnesia.md              # Local data purge command (optional)
 
-install-lib.sh                       # Shared installation functions
-install-one-command.sh              # Main installer
-install-smart.sh                    # Auto-detect installer
+i18n.py                              # Localization runtime, installed next to the scripts
+locales/en.json                      # UI strings and the indicator word list
+
+install.sh                           # The installer. The only one.
+install.js                           # npm wrapper, shells out to install.sh
+test-hook-contract.sh               # Regression test for install.sh and the hook
 ```
+
+There were nine installers: `install.sh`, `install-oneliner.sh`, `install-smart.sh`,
+`install-interactive.sh`, `install-interactive-v2.sh`, `install-interactive-lang.sh`,
+`install-i18n.sh`, `install-one-command.sh` and `install-lib.sh`. Each carried its own
+inline copy of the tracker and stats scripts, so a single bug in the hook contract had to
+be fixed in eight places. They're now one installer over `templates/`, which is the only
+place the plugin's actual code lives.
+
+Dropped along the way: `languages.json` and `config.py` (a language picker offering five
+locales that were all marked `planned` and all fell back to English — `i18n.py` already
+detects `LANG` at runtime), and the `better_profanity` install chain.
+
+Installers **merge** their hook into `settings.json` rather than overwriting it, so
+your existing hooks, permissions and MCP config survive. Re-running an installer is
+idempotent. To check every installer still honours that, run `bash test-hook-contract.sh`.
+
+Templates deliberately do **not** live under a `templates/.claude/` path: `.gitignore`
+excludes `.claude/`, so anything put there is silently never committed, and the
+downloading installers then 404. Set `BIOMASS_REPO_URL` to install from a fork,
+a branch, or a local checkout (`file:///path/to/repo`).
 
 The data? Stored in JSONL files—one per day, because apparently we need granular tracking of our descent into madness. User-level installs dump everything in `~/.claude/prompt-data/`. Project-level keeps it local in `./claude/prompt-data/`. 
 
@@ -256,36 +292,33 @@ export BIOMASS_DATA_DIR="/path/to/your/shame/folder"
 
 ### Profanity Detection
 
-The system uses the `better_profanity` Python package for comprehensive profanity detection when available. If the package isn't installed, it falls back to a basic hardcoded list. 
+A word list, matched whole-word against your prompt. That's it. `python3` is the only
+dependency, and the list lives in `locales/en.json` under `indicators.curse_words`.
 
-The install script automatically tries to install `better_profanity` using multiple methods:
-- **conda** (if available): `conda install -c conda-forge better-profanity`
-- **pip in virtual env** (if activated): `pip install better-profanity`
-- **pip with --user flag**: `pip3 install better-profanity --user`
-- **pipx** (if available): `pipx install better-profanity`
-- **Last resort**: `pip install better-profanity --break-system-packages`
+This README used to claim the plugin used the `better_profanity` package, with a
+hardcoded list as a fallback. It never did: nothing imported it. The installer went to
+some lengths to pip-install it anyway, up to and including
+`--break-system-packages`, for a package no code ever loaded. That's been removed. If
+you want smarter detection, wiring `better_profanity` into `count_curse_words()` in
+`templates/prompt-tracker.py` is the place to do it.
 
-If automatic installation fails, you can manually install using any of these methods:
+### Adding More Indicators
 
-```bash
-# Choose the method that works for your setup:
-conda install -c conda-forge better-profanity    # Anaconda/Miniconda
-pip install better-profanity --user              # User install
-pip3 install better-profanity --user             # Python 3 user install  
-pipx install better-profanity                    # Isolated install
-python -m pip install better-profanity --user    # Alternative syntax
+Edit `indicators.curse_words` in `locales/en.json` (or in the installed
+`~/.claude/locales/en.json`) to change what counts:
+
+```json
+{
+  "indicators": {
+    "curse_words": [
+      "damn", "shit", "fuck", "ass", "bitch", "hell", "crap",
+      "muppet", "donkey", "walnut"
+    ]
+  }
+}
 ```
 
-### Adding More Indicators (Fallback Mode)
-
-If you're using the fallback mode, you can edit `prompt-tracker.py` and add to the indicators list:
-
-```python
-curse_words = [
-    'damn', 'shit', 'fuck', 'ass', 'bitch', 'hell', 'crap',
-    'muppet', 'donkey', 'absolute_walnut'  # Your additions here
-]
-```
+Matching is whole-word and case-insensitive, so `classic` will not trip `ass`.
 
 ## Troubleshooting
 

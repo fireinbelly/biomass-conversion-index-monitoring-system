@@ -6,8 +6,8 @@ from datetime import datetime
 import re
 from pathlib import Path
 
-# Add the parent directory to sys.path to import i18n
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# i18n.py and locales/ are installed alongside this script.
+sys.path.insert(0, str(Path(__file__).parent))
 from i18n import _, _list
 
 def count_curse_words(text):
@@ -57,17 +57,17 @@ def save_prompt_data(prompt, curse_count, found_curses):
 
 def main():
     """Main entry point"""
-    # Read the prompt from stdin (this is how Claude Code passes the user's prompt)
-    prompt = sys.stdin.read().strip()
-    
-    # Count biomass conversion indicators
-    curse_count, found_curses = count_curse_words(prompt)
-    
-    # Save prompt data
-    save_prompt_data(prompt, curse_count, found_curses)
-    
-    # Return the original prompt unchanged (exit code 0 means continue processing)
-    print(prompt)
+    # Claude Code hands hooks a JSON payload on stdin, not the bare prompt text.
+    # Tracking must never block prompt submission, so failures stay silent.
+    try:
+        payload = json.loads(sys.stdin.read())
+        prompt = payload['prompt']
+        curse_count, found_curses = count_curse_words(prompt)
+        save_prompt_data(prompt, curse_count, found_curses)
+    except Exception:
+        pass
+
+    # Print nothing: UserPromptSubmit stdout is injected into Claude's context.
     sys.exit(0)
 
 if __name__ == "__main__":

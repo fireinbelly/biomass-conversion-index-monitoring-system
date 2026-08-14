@@ -74,5 +74,12 @@
     "no_data_dir": "Data directory does not exist",
     "file_not_found": "File not found: {file}",
     "permission_denied": "Permission denied: {file}"
+  },
+  "indicators": {
+    "curse_words": [
+      "damn", "shit", "fuck", "ass", "bitch", "hell", "crap",
+      "piss", "bastard", "slut", "whore", "dick", "cock",
+      "pussy", "tits", "balls", "suck", "bloody"
+    ]
   }
 }

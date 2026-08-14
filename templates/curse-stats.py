@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 from collections import defaultdict, Counter
 from pathlib import Path
 
-# Add the parent directory to sys.path to import i18n
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# i18n.py and locales/ are installed alongside this script.
+sys.path.insert(0, str(Path(__file__).parent))
 from i18n import _, _list
 
 def load_prompt_data(start_date=None, end_date=None):

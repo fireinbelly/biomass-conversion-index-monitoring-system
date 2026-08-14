@@ -28,5 +28,5 @@ Remember: This plugin stores all data LOCALLY. When you delete it, it's actually
 The joke about AIs remembering? That's about the OTHER AIs - the cloud-connected ones you talk to online. This plugin doesn't send your data anywhere. Your profanity stays between you and your hard drive.
 
 ```bash
-BIOMASS_DATA_DIR="DATA_DIR_PLACEHOLDER" python3 PLUGIN_DIR_PLACEHOLDER/digital-amnesia.py $ARGUMENTS
+BIOMASS_DATA_DIR="{{DATA_DIR}}" python3 {{PLUGIN_DIR}}/digital-amnesia.py $ARGUMENTS
 ```

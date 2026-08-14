@@ -13,8 +13,8 @@ import random
 from datetime import datetime
 from pathlib import Path
 
-# Add the parent directory to sys.path to import i18n
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# i18n.py and locales/ are installed alongside this script.
+sys.path.insert(0, str(Path(__file__).parent))
 try:
     from i18n import _, _list
 except ImportError:
