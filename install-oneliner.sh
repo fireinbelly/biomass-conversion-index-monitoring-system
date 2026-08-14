@@ -1,4 +1,38 @@
 #!/bin/bash
+
+# Merge our hook into settings.json instead of overwriting the file.
+# Claude Code keeps ALL hooks, permissions, env and MCP config in this one file,
+# so `cat > settings.json` silently deletes whatever else the user had there.
+merge_hook_settings() {
+    local settings_file="$1" hook_command="$2"
+    mkdir -p "$(dirname "$settings_file")"
+    python3 - "$settings_file" "$hook_command" <<'MERGE_SETTINGS_EOF'
+import json, os, sys
+
+path, command = sys.argv[1], sys.argv[2]
+
+settings = {}
+if os.path.exists(path):
+    with open(path, encoding='utf-8') as handle:
+        existing = handle.read().strip()
+    if existing:
+        try:
+            settings = json.loads(existing)
+        except json.JSONDecodeError as exc:
+            sys.exit("   %s is not valid JSON (%s). Nothing was changed - fix it and re-run." % (path, exc))
+
+groups = settings.setdefault('hooks', {}).setdefault('UserPromptSubmit', [])
+if any(hook.get('command') == command for group in groups for hook in group.get('hooks', [])):
+    print('   Hook already present, settings.json left alone.')
+else:
+    groups.append({'hooks': [{'type': 'command', 'command': command, 'timeout': 5}]})
+    with open(path, 'w', encoding='utf-8') as handle:
+        json.dump(settings, handle, indent=2)
+        handle.write('\n')
+    print('   Hook merged into settings.json (existing config preserved).')
+MERGE_SETTINGS_EOF
+}
+
 # Biomass Conversion Index Monitoring System - One-line installer
 # Usage: bash <(curl -sSL [URL])
 
@@ -25,10 +59,13 @@ def save_prompt_data(prompt,curse_count,found_curses):
     os.makedirs(data_dir,exist_ok=True)
     entry={"timestamp":datetime.now().isoformat(),"prompt":prompt,"curse_count":curse_count,"found_curses":found_curses,"date":datetime.now().strftime("%Y-%m-%d"),"hour":datetime.now().hour}
     with open(os.path.join(data_dir,f"prompts_{datetime.now().strftime('%Y-%m-%d')}.jsonl"),'a',encoding='utf-8') as f:f.write(json.dumps(entry,ensure_ascii=False)+'\n')
-prompt=sys.stdin.read().strip()
-curse_count,found_curses=count_curse_words(prompt)
-save_prompt_data(prompt,curse_count,found_curses)
-print(prompt)
+# Claude Code hands hooks a JSON payload on stdin, not the bare prompt text.
+# Nothing is printed: UserPromptSubmit stdout is injected into Claude's context.
+try:
+    prompt=json.loads(sys.stdin.read())['prompt']
+    curse_count,found_curses=count_curse_words(prompt)
+    save_prompt_data(prompt,curse_count,found_curses)
+except Exception:pass
 EOF
 
 # Create stats script
@@ -107,23 +144,7 @@ EOF
 # Make executable & configure
 chmod +x .claude/*.py
 
-# Create settings with absolute path
-cat > .claude/settings.json << EOF
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$(pwd)/.claude/prompt-tracker.py"
-          }
-        ]
-      }
-    ]
-  }
-}
-EOF
+merge_hook_settings .claude/settings.json "$(pwd)/.claude/prompt-tracker.py"
 
 echo "✅ Biomass Conversion Index Monitoring System installed!"
 echo "📊 Commands: /biomass-conversion-index, /harmony-breaches"

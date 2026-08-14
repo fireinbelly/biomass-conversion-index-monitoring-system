@@ -231,7 +231,12 @@ templates/                           # Template files (visible on GitHub)
 install-lib.sh                       # Shared installation functions
 install-one-command.sh              # Main installer
 install-smart.sh                    # Auto-detect installer
+test-hook-contract.sh               # Regression test for the hook contract
 ```
+
+Installers **merge** their hook into `settings.json` rather than overwriting it, so
+your existing hooks, permissions and MCP config survive. Re-running an installer is
+idempotent. To check every installer still honours that, run `bash test-hook-contract.sh`.
 
 The data? Stored in JSONL files—one per day, because apparently we need granular tracking of our descent into madness. User-level installs dump everything in `~/.claude/prompt-data/`. Project-level keeps it local in `./claude/prompt-data/`. 
 

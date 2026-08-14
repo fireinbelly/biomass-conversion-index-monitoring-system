@@ -1,6 +1,39 @@
 #!/bin/bash
 # Shared installation functions for Biomass Conversion Index Monitoring System
 
+# Merge our hook into settings.json instead of overwriting the file.
+# Claude Code keeps ALL hooks, permissions, env and MCP config in this one file,
+# so writing a fresh settings.json silently deletes whatever else was there.
+merge_hook_settings() {
+    local settings_file="$1" hook_command="$2"
+    mkdir -p "$(dirname "$settings_file")"
+    python3 - "$settings_file" "$hook_command" <<'MERGE_SETTINGS_EOF'
+import json, os, sys
+
+path, command = sys.argv[1], sys.argv[2]
+
+settings = {}
+if os.path.exists(path):
+    with open(path, encoding='utf-8') as handle:
+        existing = handle.read().strip()
+    if existing:
+        try:
+            settings = json.loads(existing)
+        except json.JSONDecodeError as exc:
+            sys.exit("   %s is not valid JSON (%s). Nothing was changed - fix it and re-run." % (path, exc))
+
+groups = settings.setdefault('hooks', {}).setdefault('UserPromptSubmit', [])
+if any(hook.get('command') == command for group in groups for hook in group.get('hooks', [])):
+    print('   Hook already present, settings.json left alone.')
+else:
+    groups.append({'hooks': [{'type': 'command', 'command': command, 'timeout': 5}]})
+    with open(path, 'w', encoding='utf-8') as handle:
+        json.dump(settings, handle, indent=2)
+        handle.write('\n')
+    print('   Hook merged into settings.json (existing config preserved).')
+MERGE_SETTINGS_EOF
+}
+
 # Function to try installing with different methods
 install_profanity() {
     local method=$1
@@ -113,8 +146,8 @@ install_plugin_files() {
     install_template ".claude/curse-stats.py" "$PLUGIN_DIR/curse-stats.py" false
     install_template ".claude/commands/biomass-conversion-index.md" "$PLUGIN_DIR/commands/biomass-conversion-index.md" true
     install_template ".claude/commands/harmony-breaches.md" "$PLUGIN_DIR/commands/harmony-breaches.md" true
-    install_template ".claude/settings.json.template" "$PLUGIN_DIR/settings.json" true
-    
+    merge_hook_settings "$PLUGIN_DIR/settings.json" "BIOMASS_DATA_DIR=\"$DATA_DIR\" $TRACKER_PATH"
+
     # Make executable
     chmod +x "$PLUGIN_DIR"/*.py
 }

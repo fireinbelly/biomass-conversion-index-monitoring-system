@@ -1,4 +1,38 @@
 #!/bin/bash
+
+# Merge our hook into settings.json instead of overwriting the file.
+# Claude Code keeps ALL hooks, permissions, env and MCP config in this one file,
+# so `cat > settings.json` silently deletes whatever else the user had there.
+merge_hook_settings() {
+    local settings_file="$1" hook_command="$2"
+    mkdir -p "$(dirname "$settings_file")"
+    python3 - "$settings_file" "$hook_command" <<'MERGE_SETTINGS_EOF'
+import json, os, sys
+
+path, command = sys.argv[1], sys.argv[2]
+
+settings = {}
+if os.path.exists(path):
+    with open(path, encoding='utf-8') as handle:
+        existing = handle.read().strip()
+    if existing:
+        try:
+            settings = json.loads(existing)
+        except json.JSONDecodeError as exc:
+            sys.exit("   %s is not valid JSON (%s). Nothing was changed - fix it and re-run." % (path, exc))
+
+groups = settings.setdefault('hooks', {}).setdefault('UserPromptSubmit', [])
+if any(hook.get('command') == command for group in groups for hook in group.get('hooks', [])):
+    print('   Hook already present, settings.json left alone.')
+else:
+    groups.append({'hooks': [{'type': 'command', 'command': command, 'timeout': 5}]})
+    with open(path, 'w', encoding='utf-8') as handle:
+        json.dump(settings, handle, indent=2)
+        handle.write('\n')
+    print('   Hook merged into settings.json (existing config preserved).')
+MERGE_SETTINGS_EOF
+}
+
 # I18n-ready installer for Biomass Conversion Index Monitoring System
 # Usage: bash <(curl -sSL https://raw.githubusercontent.com/fireinbelly/biomass-conversion-index-monitoring-system/main/install-i18n.sh)
 
@@ -313,17 +347,17 @@ def save_prompt_data(prompt, curse_count, found_curses):
 
 def main():
     """Main entry point"""
-    # Read the prompt from stdin (this is how Claude Code passes the user's prompt)
-    prompt = sys.stdin.read().strip()
-    
-    # Count biomass conversion indicators
-    curse_count, found_curses = count_curse_words(prompt)
-    
-    # Save prompt data
-    save_prompt_data(prompt, curse_count, found_curses)
-    
-    # Return the original prompt unchanged (exit code 0 means continue processing)
-    print(prompt)
+    # Claude Code hands hooks a JSON payload on stdin, not the bare prompt text.
+    # Tracking must never block prompt submission, so failures stay silent.
+    try:
+        payload = json.loads(sys.stdin.read())
+        prompt = payload['prompt']
+        curse_count, found_curses = count_curse_words(prompt)
+        save_prompt_data(prompt, curse_count, found_curses)
+    except Exception:
+        pass
+
+    # Print nothing: UserPromptSubmit stdout is injected into Claude's context.
     sys.exit(0)
 
 if __name__ == "__main__":
@@ -446,23 +480,7 @@ EOF
 # Make scripts executable
 chmod +x "$PLUGIN_DIR"/*.py
 
-# Create settings
-cat > "$PLUGIN_DIR/settings.json" << EOF
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command", 
-            "command": "BIOMASS_DATA_DIR=\"$DATA_DIR\" $TRACKER_PATH"
-          }
-        ]
-      }
-    ]
-  }
-}
-EOF
+merge_hook_settings "$PLUGIN_DIR/settings.json" "BIOMASS_DATA_DIR=\"$DATA_DIR\" $TRACKER_PATH"
 
 echo ""
 echo "✅ Biomass Conversion Index Monitoring System installed with i18n support!"
