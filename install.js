@@ -14,8 +14,10 @@ console.log('');
 try {
     console.log('📥 Downloading installer...');
     
-    const installerUrl = `${REPO_URL}/install-interactive.sh`;
-    const curlCommand = `curl -sSL "${installerUrl}" | bash`;
+    const installerUrl = `${REPO_URL}/install.sh`;
+    // The installer is interactive, so it needs a real stdin: pipe it to a file and run
+    // that, rather than `curl | bash` which hands bash the script on stdin.
+    const curlCommand = `set -e; t=$(mktemp); curl -sSL --fail "${installerUrl}" -o "$t"; bash "$t"; rm -f "$t"`;
     
     console.log('🚀 Running interactive installer...');
     console.log('');
@@ -29,6 +31,6 @@ try {
     console.error('❌ Installation failed:', error.message);
     console.log('');
     console.log('💡 Fallback: Try manual installation:');
-    console.log(`   curl -sSL ${REPO_URL}/install-interactive.sh | bash`);
+    console.log(`   bash <(curl -sSL ${REPO_URL}/install.sh)`);
     process.exit(1);
 }
