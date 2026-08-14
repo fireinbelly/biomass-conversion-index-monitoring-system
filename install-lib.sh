@@ -91,29 +91,36 @@ install_better_profanity() {
     fi
 }
 
-# Function to download or copy template files
+# Function to download or copy a repo file
+# $1 is repo-relative (e.g. templates/curse-stats.py, i18n.py, locales/en.json) so
+# files outside templates/ can be installed too.
 install_template() {
-    local src_file=$1
+    local src_path=$1
     local dest_file=$2
     local use_placeholders=${3:-false}
-    
-    REPO_URL="https://raw.githubusercontent.com/fireinbelly/biomass-conversion-index-monitoring-system/main"
-    
-    if [[ -f "templates/$src_file" ]]; then
-        # Local development - copy from templates
+
+    # Overridable so forks, branches and the test suite can install from elsewhere.
+    REPO_URL="${BIOMASS_REPO_URL:-https://raw.githubusercontent.com/fireinbelly/biomass-conversion-index-monitoring-system/main}"
+
+    mkdir -p "$(dirname "$dest_file")"
+
+    if [[ -f "$src_path" ]]; then
+        # Local development - copy from the checkout
         if $use_placeholders; then
             # Replace placeholders in template
             sed -e "s|{{DATA_DIR}}|$DATA_DIR|g" \
                 -e "s|{{PLUGIN_DIR}}|$PLUGIN_DIR|g" \
                 -e "s|{{TRACKER_PATH}}|$TRACKER_PATH|g" \
-                "templates/$src_file" > "$dest_file"
+                "$src_path" > "$dest_file"
         else
-            cp "templates/$src_file" "$dest_file"
+            cp "$src_path" "$dest_file"
         fi
-        echo "   ✅ Copied $src_file"
+        echo "   ✅ Copied $src_path"
     elif command -v curl &> /dev/null; then
-        # Download from GitHub
-        if curl -sSL "$REPO_URL/templates/$src_file" -o "$dest_file" 2>/dev/null; then
+        # --fail matters: without it curl writes GitHub's "404: Not Found" body into
+        # the destination and still exits 0, so a missing file installs as a broken
+        # script and the installer reports success.
+        if curl -sSL --fail "$REPO_URL/$src_path" -o "$dest_file"; then
             if $use_placeholders; then
                 # Replace placeholders after download
                 sed -i.bak -e "s|{{DATA_DIR}}|$DATA_DIR|g" \
@@ -121,13 +128,14 @@ install_template() {
                            -e "s|{{TRACKER_PATH}}|$TRACKER_PATH|g" \
                            "$dest_file" && rm -f "$dest_file.bak"
             fi
-            echo "   ✅ Downloaded $src_file"
+            echo "   ✅ Downloaded $src_path"
         else
-            echo "   ❌ Failed to download $src_file"
+            echo "   ❌ Failed to download $src_path"
+            rm -f "$dest_file"
             return 1
         fi
     else
-        echo "   ❌ Cannot download $src_file (no curl available)"
+        echo "   ❌ Cannot download $src_path (no curl available)"
         return 1
     fi
     return 0
@@ -141,12 +149,20 @@ install_plugin_files() {
     mkdir -p "$PLUGIN_DIR/commands"
     mkdir -p "$DATA_DIR"
     
-    # Install core files
-    install_template ".claude/prompt-tracker.py" "$PLUGIN_DIR/prompt-tracker.py" false
-    install_template ".claude/curse-stats.py" "$PLUGIN_DIR/curse-stats.py" false
-    install_template ".claude/commands/biomass-conversion-index.md" "$PLUGIN_DIR/commands/biomass-conversion-index.md" true
-    install_template ".claude/commands/harmony-breaches.md" "$PLUGIN_DIR/commands/harmony-breaches.md" true
-    merge_hook_settings "$PLUGIN_DIR/settings.json" "BIOMASS_DATA_DIR=\"$DATA_DIR\" $TRACKER_PATH"
+    # Install core files. Any failure aborts: a half-installed plugin that reports
+    # success is how the missing templates went unnoticed.
+    install_template "templates/prompt-tracker.py" "$PLUGIN_DIR/prompt-tracker.py" false || return 1
+    install_template "templates/curse-stats.py" "$PLUGIN_DIR/curse-stats.py" false || return 1
+
+    # Both scripts do `from i18n import ...` and i18n.py loads locales/ from its own
+    # directory, so the runtime has to sit next to them.
+    install_template "i18n.py" "$PLUGIN_DIR/i18n.py" false || return 1
+    install_template "locales/en.json" "$PLUGIN_DIR/locales/en.json" false || return 1
+
+    install_template "templates/commands/biomass-conversion-index.md" "$PLUGIN_DIR/commands/biomass-conversion-index.md" true || return 1
+    install_template "templates/commands/harmony-breaches.md" "$PLUGIN_DIR/commands/harmony-breaches.md" true || return 1
+
+    merge_hook_settings "$PLUGIN_DIR/settings.json" "BIOMASS_DATA_DIR=\"$DATA_DIR\" $TRACKER_PATH" || return 1
 
     # Make executable
     chmod +x "$PLUGIN_DIR"/*.py

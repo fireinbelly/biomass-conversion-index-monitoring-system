@@ -31,6 +31,7 @@ install-i18n.sh|1 y
 install-interactive.sh|1 y
 install-interactive-v2.sh|1 y
 install-interactive-lang.sh|1 1 y
+install-one-command.sh|1 y
 "
 
 check() {
@@ -45,7 +46,10 @@ check() {
 
 run_installer() {
     # $1 = installer, $2 = answers, $3 = project dir
-    ( cd "$3" && for a in $2; do echo "$a"; done | bash "$REPO_DIR/$1" ) >"$SANDBOX/install.log" 2>&1
+    # BIOMASS_REPO_URL points the template-downloading installers at this checkout
+    # instead of GitHub main, so the test exercises the code under test.
+    ( cd "$3" && for a in $2; do echo "$a"; done \
+        | BIOMASS_REPO_URL="file://$REPO_DIR" bash "$REPO_DIR/$1" ) >"$SANDBOX/install.log" 2>&1
 }
 
 while IFS= read -r entry; do

@@ -69,7 +69,8 @@ if [[ -f "install-lib.sh" ]]; then
 elif command -v curl &> /dev/null; then
     # Download install-lib.sh if not available locally
     TEMP_LIB=$(mktemp)
-    if curl -sSL "https://raw.githubusercontent.com/fireinbelly/biomass-conversion-index-monitoring-system/main/install-lib.sh" -o "$TEMP_LIB" 2>/dev/null; then
+    REPO_URL="${BIOMASS_REPO_URL:-https://raw.githubusercontent.com/fireinbelly/biomass-conversion-index-monitoring-system/main}"
+    if curl -sSL --fail "$REPO_URL/install-lib.sh" -o "$TEMP_LIB"; then
         source "$TEMP_LIB"
         rm -f "$TEMP_LIB"
     else

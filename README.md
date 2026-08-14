@@ -218,15 +218,16 @@ Right, let's get technical for a second because this is still a README and we ha
     └── harmony-breaches.md         # Quick daily summary
 
 templates/                           # Template files (visible on GitHub)
-└── .claude/
-    ├── settings.json.template       # Hook configuration template
-    ├── prompt-tracker.py           # Prompt tracking script
-    ├── curse-stats.py              # Statistics script
-    └── commands/
-        ├── biomass-conversion-index.md # Main stats command template
-        └── harmony-breaches.md     # Quick daily summary template
-    ├── digital-amnesia.py          # The memory hole (optional)
-    └── digital-amnesia.md          # Local data purge command (optional)
+├── prompt-tracker.py               # Prompt tracking script
+├── curse-stats.py                  # Statistics script
+├── commands/
+│   ├── biomass-conversion-index.md # Main stats command template
+│   └── harmony-breaches.md         # Quick daily summary template
+├── digital-amnesia.py              # The memory hole (optional)
+└── digital-amnesia.md              # Local data purge command (optional)
+
+i18n.py                              # Localization runtime, installed next to the scripts
+locales/en.json                      # UI strings and the indicator word list
 
 install-lib.sh                       # Shared installation functions
 install-one-command.sh              # Main installer
@@ -237,6 +238,11 @@ test-hook-contract.sh               # Regression test for the hook contract
 Installers **merge** their hook into `settings.json` rather than overwriting it, so
 your existing hooks, permissions and MCP config survive. Re-running an installer is
 idempotent. To check every installer still honours that, run `bash test-hook-contract.sh`.
+
+Templates deliberately do **not** live under a `templates/.claude/` path: `.gitignore`
+excludes `.claude/`, so anything put there is silently never committed, and the
+downloading installers then 404. Set `BIOMASS_REPO_URL` to install from a fork,
+a branch, or a local checkout (`file:///path/to/repo`).
 
 The data? Stored in JSONL files—one per day, because apparently we need granular tracking of our descent into madness. User-level installs dump everything in `~/.claude/prompt-data/`. Project-level keeps it local in `./claude/prompt-data/`. 
 
