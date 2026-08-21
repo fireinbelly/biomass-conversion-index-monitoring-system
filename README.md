@@ -228,6 +228,7 @@ Right, let's get technical for a second because this is still a README and we ha
 ├── settings.json                    # Hook configuration
 ├── prompt-tracker.py               # The snitch
 ├── curse-stats.py                  # The accountant
+├── indicators.json                 # The word lists, all 45 languages
 └── commands/
     ├── biomass-conversion-index.md # Main stats command
     └── harmony-breaches.md         # Quick daily summary
@@ -235,6 +236,7 @@ Right, let's get technical for a second because this is still a README and we ha
 templates/                           # Template files (visible on GitHub)
 ├── prompt-tracker.py               # Prompt tracking script
 ├── curse-stats.py                  # Statistics script
+├── indicators.json                 # Indicator word lists, one per language
 ├── commands/
 │   ├── biomass-conversion-index.md # Main stats command template
 │   └── harmony-breaches.md         # Quick daily summary template
@@ -242,11 +244,12 @@ templates/                           # Template files (visible on GitHub)
 └── digital-amnesia.md              # Local data purge command (optional)
 
 i18n.py                              # Localization runtime, installed next to the scripts
-locales/en.json                      # UI strings and the indicator word list
+locales/en.json                      # UI strings (not the word list - see indicators.json)
 
 install.sh                           # The installer. The only one.
 install.js                           # npm wrapper, shells out to install.sh
 test-hook-contract.sh               # Regression test for install.sh and the hook
+test-indicators.py                  # Regression test for the word lists
 ```
 
 There were nine installers: `install.sh`, `install-oneliner.sh`, `install-smart.sh`,
@@ -292,31 +295,63 @@ export BIOMASS_DATA_DIR="/path/to/your/shame/folder"
 
 ### Profanity Detection
 
-A word list, matched whole-word against your prompt. That's it. `python3` is the only
-dependency, and the list lives in `locales/en.json` under `indicators.curse_words`.
+A word list, matched against your prompt. That's it. `python3` is the only dependency
+and the lists live in `templates/indicators.json`, roughly 930 terms across 45
+languages.
+
+Every language's list is checked on every prompt, whatever `LANG` says, because people
+swear in their first language with their locale set to `en_US`. There is nothing to
+configure and no language to pick.
+
+Matching is whole-word and case-insensitive, so `classic` will not trip `ass` and
+`shell` will not trip `hell`. The one exception is Chinese, Japanese, Korean, Thai and
+Bopomofo: those scripts don't put spaces between words, so there is no word boundary to
+anchor to and terms in them are matched as substrings instead. `幹你娘` in the middle of
+an unbroken run of characters is found; whole-word matching would never have fired on it.
 
 This README used to claim the plugin used the `better_profanity` package, with a
 hardcoded list as a fallback. It never did: nothing imported it. The installer went to
 some lengths to pip-install it anyway, up to and including
-`--break-system-packages`, for a package no code ever loaded. That's been removed. If
-you want smarter detection, wiring `better_profanity` into `count_curse_words()` in
-`templates/prompt-tracker.py` is the place to do it.
+`--break-system-packages`, for a package no code ever loaded. That's been removed.
+
+### What counts as an indicator
+
+Real profanity, and vulgar insults used as profanity. Deliberately **not** counted:
+
+- Minced oaths and mild interjections. `omg`, `darn`, `heck`, `gosh`, `jeez`, `天啊`,
+  `あら` are not swearing, and neither are the softened forms of real swears that are
+  already on the list (Swedish `jäklar`, Tagalog `putragis`, Spanish `gilipuertas`).
+- Racial and ethnic slurs. Targeted hate speech, not frustration at a build.
+- Anything that hides inside an innocent word. This is the expensive mistake in the
+  substring-matched scripts, so bare `幹` (幹嘛, 骨幹, 樹幹), `操` (操作), `三小` (三小時),
+  `ばか` (ばかり), `カス` (カスタム), `시발` (시발점), `씹` (씹다) and `หี` (หีบ) are all
+  excluded on purpose.
+- Anything that is an ordinary word in another language, since all lists run at once:
+  English `git`, French `con`, German `Mist`, Swedish `fan`, Spanish `coger`.
 
 ### Adding More Indicators
 
-Edit `indicators.curse_words` in `locales/en.json` (or in the installed
-`~/.claude/locales/en.json`) to change what counts:
+Edit `templates/indicators.json` (or the installed `~/.claude/indicators.json`):
 
 ```json
 {
-  "indicators": {
-    "curse_words": [
-      "damn", "shit", "fuck", "ass", "bitch", "hell", "crap",
-      "muppet", "donkey", "walnut"
-    ]
+  "curse_words": {
+    "en": ["damn", "shit", "muppet", "donkey", "walnut"],
+    "zh": ["幹你娘", "靠北", "e04"]
   }
 }
 ```
+
+The language key is for humans; the tracker flattens every list into one. Then run:
+
+```bash
+python3 test-indicators.py
+```
+
+It checks that each language's sample still gets caught, that the innocent-word traps
+above still score zero, that minced oaths aren't counted, and that no non-English term
+collides with a word in `/usr/share/dict/words`. Accepted collisions are declared in
+`_english_homographs` in the JSON with a reason each, so a new one still fails.
 
 Matching is whole-word and case-insensitive, so `classic` will not trip `ass`.
 

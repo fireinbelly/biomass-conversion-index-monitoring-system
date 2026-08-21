@@ -194,8 +194,12 @@ mkdir -p "$DATA_DIR"
 install_file "templates/prompt-tracker.py" "$PLUGIN_DIR/prompt-tracker.py"
 install_file "templates/curse-stats.py"    "$PLUGIN_DIR/curse-stats.py"
 
-# Both scripts do `from i18n import ...` and i18n.py loads locales/ relative to itself,
-# so the runtime has to sit next to them. Language comes from LANG at runtime.
+# The word lists the tracker matches on. Not a locale file: every language's list is
+# checked on every prompt, so this is installed regardless of LANG.
+install_file "templates/indicators.json" "$PLUGIN_DIR/indicators.json"
+
+# curse-stats.py does `from i18n import ...` and i18n.py loads locales/ relative to
+# itself, so the runtime has to sit next to it. Language comes from LANG at runtime.
 install_file "i18n.py"          "$PLUGIN_DIR/i18n.py"
 install_file "locales/en.json"  "$PLUGIN_DIR/locales/en.json"
 

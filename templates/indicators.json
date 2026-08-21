@@ -1,0 +1,276 @@
+{
+  "_note": [
+    "Indicator terms grouped by language. Every list is checked against every prompt no",
+    "matter what LANG says: people swear in their first language with their locale set to",
+    "en_US. This is data, not a locale file - UI strings live in locales/*.json.",
+    "",
+    "What's in: real profanity, and vulgar insults used as profanity.",
+    "What's out, on purpose:",
+    "  - Minced oaths and mild interjections. OMG, darn, heck, gosh, jeez, shoot, crikey,",
+    "    天啊, あら, 어머 are not swearing. Nor are sv jäklar, tl putragis, uk бляха-муха,",
+    "    id kampret, es gilipuertas, it mannaggia - each is the softened form of a real",
+    "    swear that is already listed.",
+    "  - Insults that are merely rude: idiot, stupid, ja てめえ, ko 닥쳐, zh 廢話.",
+    "  - Racial and ethnic slurs. Targeted hate speech, not frustration at a build.",
+    "  - Anything that appears inside an innocent word. Chinese, Japanese, Korean, Thai",
+    "    and Bopomofo have no spaces, so those terms are matched as substrings and a",
+    "    collision is permanent. Excluded for that reason: 幹 (幹嘛/骨幹/樹幹), 操 (操作),",
+    "    我靠 (我靠近), 三小 (三小時), 媽的 (我媽的電話), ばか (ばかり), カス (カスタム),",
+    "    ボケ (写真がボケる), しね (動作しねぇ), 시발 (시발점), 씹 (씹다), 졸라 (졸라대다),",
+    "    새끼 (강아지 새끼), หี (หีบ), แม่ง (แม่งาน), 柒 (柒佰元), 鳩 (斑鳩), 屁 (屁股),",
+    "    撚 (撚手小菜 - the compounds 好撚/唔撚/撚樣 are listed instead).",
+    "  - Anything that is an ordinary word in another language, because all lists match at",
+    "    once: en git/hoe/fag/sod, fr con/bite/cul, de Mist, sv fan/skit, es coger/concha,",
+    "    tr mal, nl kanker/tering/eikel/doos/naai, hi साला, bg кур, ro morții.",
+    "  - Two-letter ASCII abbreviations that collide with real acronyms: bc, mc, sb, tmd,",
+    "    vl, aq. e04, on9, nmsl, vcl, amk, bkl and fdp are unambiguous and stay.",
+    "",
+    "test-indicators.py enforces all of the above. Run it after editing."
+  ],
+  "_english_homographs": {
+    "_why": [
+      "test-indicators.py fails any non-English term that is also in /usr/share/dict/words,",
+      "because every list runs against every prompt and a Swedish term that is an English",
+      "word turns every English prompt into a false positive. These nine are the accepted",
+      "exceptions: each is archaic, taxonomic or a loanword nobody types in English, while",
+      "the swear itself is common in its own language. A NEW collision still fails."
+    ],
+    "bordel": "fr - English 'bordel' is an archaic spelling of bordello",
+    "cony": "ca - English 'cony' is an archaic word for rabbit",
+    "foder": "pt - English 'foder' is an obsolete dialect form",
+    "hoer": "nl - English 'hoer' is an obsolete spelling",
+    "hure": "de - English 'hure' is an obsolete spelling",
+    "perse": "et - English 'perse' is an archaic name for a dark blue cloth",
+    "pinche": "es - English 'pinche' is the Spanish loanword for a kitchen hand",
+    "sial": "ms - English 'sial' is the geological silica-aluminium layer",
+    "sitta": "et - English 'Sitta' is the nuthatch genus"
+  },
+  "curse_words": {
+    "en": [
+      "damn", "damned", "dammit", "damnit", "goddamn", "goddam", "goddamnit", "goddammit",
+      "shit", "shits", "shite", "shitty", "shitting", "shithead", "shitshow", "shitstorm",
+      "bullshit", "dogshit", "horseshit", "batshit", "shitfaced", "shitbag",
+      "fuck", "fucked", "fucker", "fuckers", "fucking", "fucks", "fuckup",
+      "fuckwit", "fucktard", "fuckery", "clusterfuck", "motherfucker", "motherfuckers",
+      "motherfucking", "wtf", "stfu", "gtfo", "ffs", "fml", "lmfao",
+      "ass", "asses", "asshole", "assholes", "asshat", "assclown", "dumbass", "jackass",
+      "smartass", "arse", "arsed", "arsehole", "arseholes",
+      "bitch", "bitches", "bitching", "bitchy", "sonofabitch", "son of a bitch",
+      "hell", "crap", "crappy", "piss", "pissed", "pissing", "piss off", "pissant",
+      "bastard", "bastards", "slut", "sluts", "whore", "whores", "skank",
+      "dick", "dicks", "dickhead", "dickheads", "dickwad", "dickish",
+      "cock", "cocks", "cocksucker", "pussy", "twat", "cunt", "cunts",
+      "tits", "titties", "balls", "ballsack", "nutsack", "bollocks",
+      "suck", "sucks", "sucked", "sucking", "sucky",
+      "bloody", "bugger", "buggered", "bugger off", "wank", "wanker", "tosser",
+      "prick", "pricks", "knobhead", "pillock", "plonker", "sodding",
+      "douche", "douchebag", "scumbag", "jerkoff", "jackoff", "retard", "retarded",
+      "faggot"
+    ],
+    "zh": [
+      "幹你娘", "幹妳娘", "干你娘", "幹您娘", "幹林娘", "幹你老師", "幹你老母", "幹你屁事",
+      "他媽的", "他妈的", "你媽的", "你妈的", "去你媽", "去你妈", "尼瑪", "尼玛", "馬勒戈壁",
+      "操你媽", "操你妈", "操他媽", "操他妈", "操你大爺", "操你祖宗", "肏", "操逼", "操屄",
+      "媽了個逼", "妈了个逼", "他奶奶的", "草泥馬", "草泥马", "臥槽", "卧槽", "我肏",
+      "傻逼", "傻屄", "煞筆", "屄", "雞巴", "鸡巴", "機掰", "机掰", "雞掰", "屌毛",
+      "王八蛋", "混蛋", "渾蛋", "浑蛋", "混帳", "混账", "狗屎", "狗娘養", "狗娘养",
+      "狗雜種", "狗杂种", "狗東西", "狗东西", "禽獸不如",
+      "放屁", "屁話", "屁话", "賤人", "贱人", "賤貨", "贱货", "婊", "婊子", "臭婊子",
+      "智障", "低能兒", "低能儿", "腦殘", "脑残", "幹話", "死全家", "去死吧", "不得好死",
+      "靠北", "靠腰", "靠杯", "三洨", "啥洨", "洨", "破麻", "e04", "nmsl"
+    ],
+    "yue": [
+      "屌", "屌你", "屌你老母", "屌那媽", "丟你老母", "閪", "臭閪", "西閪",
+      "好撚", "唔撚", "乜撚", "咩撚", "撚樣", "撚化", "痴撚線",
+      "冚家鏟", "冚家伶", "冚家富貴", "仆街", "撲街", "戇鳩", "戇尻", "老柒", "柒頭",
+      "死八婆", "屎忽", "on9"
+    ],
+    "ja": [
+      "くそ", "クソ", "糞", "くそったれ", "クソッタレ", "クソ野郎", "クソが", "くそが",
+      "ちくしょう", "チクショウ", "畜生", "くたばれ", "馬鹿野郎", "ばかやろう", "バカヤロー",
+      "バカヤロウ", "アホンダラ", "死ね", "ちんこ", "まんこ", "きんたま", "うんこ",
+      "ふざけんな", "ふざけるな", "ざけんな", "クソゲー", "クソくらえ", "糞喰らえ"
+    ],
+    "ko": [
+      "씨발", "씨팔", "씨빨", "쓰발", "씨발놈", "씨발년", "좆", "좆같", "좆까", "존나",
+      "개새끼", "개자식", "개소리", "개년", "개놈", "병신", "지랄", "니미", "니미럴", "썅",
+      "쌍놈", "미친놈", "미친년", "엿먹어", "ㅅㅂ", "ㅂㅅ", "ㅈㄹ"
+    ],
+    "th": [
+      "เหี้ย", "ไอ้เหี้ย", "ควย", "ไอ้ควย", "เย็ด", "สัส", "ชิบหาย", "ฉิบหาย",
+      "กระหรี่", "ระยำ", "ไอ้สัตว์", "จัญไร"
+    ],
+    "vi": [
+      "đéo", "địt", "đụ", "cặc", "lồn", "buồi", "đm", "đmm", "đcm", "dcm", "vcl", "vkl",
+      "clm", "cmn", "mẹ kiếp", "đồ chó", "khốn nạn"
+    ],
+    "es": [
+      "joder", "jodido", "jodida", "jódete", "jodete", "mierda", "mierdas",
+      "puta", "putas", "puto", "putos", "putada", "coño", "cabrón", "cabron", "cabrones",
+      "gilipollas", "gilipollez", "pendejo", "pendeja", "pendejos", "chingada", "chingado",
+      "chingar", "chinga", "pinche", "verga", "vergazo", "cojones", "carajo", "culero",
+      "maricón", "maricon", "hostia", "hostias", "hijoputa", "hijueputa", "mamón",
+      "mamada", "pelotudo", "boludo", "follar", "capullo", "malparido"
+    ],
+    "fr": [
+      "putain", "putains", "merde", "merdes", "merdique", "emmerde", "emmerder",
+      "emmerdant", "connard", "connards", "connasse", "connerie", "conneries",
+      "salope", "salopes", "salaud", "salopard", "enculé", "encule", "enculer", "enculés",
+      "foutre", "foutu", "foutue", "bordel", "chier", "chiant", "chiante", "chiotte",
+      "niquer", "nique", "niqué", "pute", "putes", "couilles", "couillon", "branleur",
+      "branlette", "ta gueule", "ferme ta gueule", "fils de pute", "va te faire foutre",
+      "batard", "bâtard", "trouduc"
+    ],
+    "de": [
+      "scheiße", "scheisse", "scheiß", "scheiss", "scheißdreck", "scheissdreck",
+      "scheißegal", "beschissen", "arsch", "arschloch", "arschlöcher", "arschgeige",
+      "fotze", "wichser", "wichsen", "verdammt", "verdammte", "fick", "ficken", "fickt",
+      "gefickt", "hurensohn", "hurensöhne", "kacke", "kack", "hure", "huren",
+      "miststück", "verpiss", "drecksau", "drecksack", "vollidiot", "affenarsch",
+      "leck mich"
+    ],
+    "pt": [
+      "caralho", "caralhos", "porra", "merda", "merdas", "foda", "fodido", "fodida",
+      "foder", "fodam", "fode", "puta", "putas", "puto", "bosta", "buceta", "cacete",
+      "corno", "vadia", "vagabunda", "desgraçado", "filho da puta", "filha da puta",
+      "fdp", "pqp", "vai se foder", "vai tomar no cu", "arrombado", "escroto", "babaca"
+    ],
+    "it": [
+      "cazzo", "cazzi", "cazzata", "cazzate", "incazzato", "incazzata", "merda", "merde",
+      "stronzo", "stronza", "stronzi", "stronzate", "coglione", "coglioni", "vaffanculo",
+      "fanculo", "affanculo", "puttana", "puttane", "troia", "troie", "minchia",
+      "bastardo", "bastarda", "culo", "figa", "porca puttana", "porco dio"
+    ],
+    "ru": [
+      "блядь", "блять", "бля", "блядский", "хуй", "хуя", "хую", "хуё", "хуйня", "хуёво",
+      "хуево", "нахуй", "похуй", "охуеть", "охуенно", "пизда", "пиздец", "пиздато",
+      "пиздеть", "ебать", "ебал", "ебан", "ебаный", "ёбаный", "ебанутый",
+      "заебал", "заебись", "наебал", "долбоеб", "долбоёб", "мудак", "мудило",
+      "сука", "суки", "сучка", "говно", "говнище", "залупа", "гандон", "пидор", "пидорас",
+      "херня", "нахер", "жопа"
+    ],
+    "uk": [
+      "хуйло", "підор", "гівно", "срака", "курва", "йобаний", "довбойоб", "дупа"
+    ],
+    "pl": [
+      "kurwa", "kurwy", "kurwie", "chuj", "chuja", "chujowy", "pierdol", "pierdolić",
+      "pierdolony", "spierdalaj", "wypierdalaj", "jebać", "jebany", "jebana", "zajebał",
+      "zajebiste", "pizda", "pizdy", "skurwysyn", "skurwiel", "gówno", "gówniany",
+      "dupa", "dupek", "ciota", "cholera jasna"
+    ],
+    "cs": [
+      "kurva", "kurvy", "hovno", "prdel", "do prdele", "píča", "píčo", "kokot", "čurák",
+      "zmrd", "jebat", "vyjebaný", "mrdat", "sráč", "svině", "debil", "kretén", "hajzl"
+    ],
+    "sk": [
+      "kurva", "piča", "kokot", "jebať", "vyjebaný", "do riti", "hovno", "sviňa",
+      "debil", "kretén", "sráč", "prdel"
+    ],
+    "hu": [
+      "bazd meg", "baszd meg", "baszki", "bassza", "baszom", "kurva", "kurvára",
+      "geci", "fasz", "faszom", "faszfej", "picsa", "picsába", "szar", "szarul",
+      "rohadt", "köcsög", "buzi", "anyád"
+    ],
+    "ro": [
+      "pula", "pulă", "pizda", "pizdă", "futu", "futu-i", "muie", "căcat", "cacat",
+      "curva", "curvă", "bulangiu", "băga-mi-aș", "dracu", "naiba"
+    ],
+    "bg": [
+      "мамка му", "ебати", "ебал", "путка", "лайно", "копеле", "гъз", "шибан", "педал"
+    ],
+    "sr": [
+      "jebem", "jebeš", "jebote", "jebi se", "jebiga", "pizda", "pizde", "kurac",
+      "kurčina", "govno", "sranje", "pička", "picka", "kurva", "šupak", "govnar"
+    ],
+    "sl": [
+      "jebi", "jebemti", "jebeš", "pizda", "kurac", "drek", "sranje", "prekleto",
+      "kurba", "pizdarija"
+    ],
+    "nl": [
+      "kut", "kutzooi", "klootzak", "klootzakken", "godverdomme", "verdomme", "godver",
+      "lul", "lullig", "hoer", "hoeren", "neuken", "geneukt", "kloten", "schijt",
+      "schijtzooi", "teringlijer", "flikker", "achterlijk"
+    ],
+    "af": [
+      "kak", "kakhuis", "poes", "fok", "fokken", "fokkit", "moerse", "bliksem jou"
+    ],
+    "sv": [
+      "jävla", "jävlar", "jävligt", "helvete", "för helvete", "fitta", "fittan",
+      "kuk", "kukhuvud", "skitstövel", "skitsnack", "förbannad", "rövhål", "knulla"
+    ],
+    "no": [
+      "faen", "faens", "faen i helvete", "helvete", "helvetes", "fitte", "kuk",
+      "drittsekk", "dritt", "forbanna", "jævla", "jævlig", "rævhøl", "knulle"
+    ],
+    "da": [
+      "for fanden", "for helvede", "helvedes", "fandeme", "skiderik", "røvhul",
+      "lorteland", "pikslikker", "kraftedeme", "møgsvin"
+    ],
+    "fi": [
+      "perkele", "vittu", "vitun", "vittumainen", "saatana", "saatanan", "paska",
+      "paskaa", "paskat", "helvetti", "helvetin", "jumalauta", "kyrpä", "mulkku",
+      "kusipää", "runkkari"
+    ],
+    "is": [
+      "helvítis", "andskotinn", "fjandinn", "fokking", "rassgat", "djöfullinn"
+    ],
+    "et": [
+      "kurat", "kuradi", "perse", "persse", "sitt", "sitta", "munn", "raisk", "pask"
+    ],
+    "lt": [
+      "šūdas", "šūdą", "bybis", "pyzda", "kurva", "eik nachui"
+    ],
+    "lv": [
+      "sūds", "sūdi", "dirsa", "pimpis", "mauka", "nolādēts"
+    ],
+    "tr": [
+      "amk", "amına", "amına koyayım", "siktir", "siktir git", "sikeyim", "sikik",
+      "sikerim", "orospu", "orospu çocuğu", "piç", "piçler", "yarrak", "göt", "götveren",
+      "amcık", "hassiktir", "yavşak", "puşt", "kahpe"
+    ],
+    "el": [
+      "μαλάκα", "μαλάκας", "μαλακία", "μαλακίες", "γαμώ", "γαμώτο", "γαμήσου",
+      "πούτσα", "πουτάνα", "μουνί", "σκατά", "αρχίδια", "καριόλης"
+    ],
+    "he": [
+      "חרא", "זונה", "בן זונה", "כוסאמק", "כוס אמק", "לך תזדיין", "מזדיין", "שרמוטה"
+    ],
+    "ar": [
+      "كسمك", "كس امك", "كس اختك", "خرا", "خرة", "شرموطة", "شرموط", "عرص", "منيوك",
+      "يلعن ابوك", "ابن الشرموطة", "زبي", "طيز"
+    ],
+    "fa": [
+      "کیر", "کونی", "جنده", "گاییدم", "تخمی", "حرومزاده", "پدرسگ"
+    ],
+    "ur": [
+      "بہنچود", "مادرچود", "چوتیا", "حرامی", "بھڑوا", "گانڈو"
+    ],
+    "hi": [
+      "चूतिया", "चूतिये", "मादरचोद", "बहनचोद", "भोसड़ी", "भोसड़ीके", "गांडू", "गांड", "लंड",
+      "हरामी", "हरामज़ादा", "भड़वा", "रंडी", "चुदाई",
+      "chutiya", "chutiye", "madarchod", "bhenchod", "bahenchod", "bhosdike", "bhosdi",
+      "gaandu", "gaand", "randi", "harami", "haramzada", "bkl", "lauda", "lund"
+    ],
+    "bn": [
+      "চুদ", "চোদা", "মাগি", "খানকি", "বাল", "হারামি", "মাদারচোদ"
+    ],
+    "ta": [
+      "புண்டை", "தேவடியா", "கூதி"
+    ],
+    "id": [
+      "bangsat", "kontol", "memek", "ngentot", "jancok", "jancuk", "bajingan",
+      "keparat", "brengsek", "tai lu"
+    ],
+    "ms": [
+      "pukimak", "puki", "kimak", "lancau", "celaka", "sial", "haramjadah"
+    ],
+    "tl": [
+      "putangina", "putang ina", "tangina", "tang ina", "gago", "gaga",
+      "ulol", "punyeta", "pakyu", "tarantado", "hayop ka", "lintik", "buwisit"
+    ],
+    "ca": [
+      "collons", "hòstia", "hostia", "merda", "cabró", "cabron", "puta", "putes",
+      "fill de puta", "cony", "malparit"
+    ]
+  }
+}

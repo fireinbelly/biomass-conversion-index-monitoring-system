@@ -11,6 +11,9 @@
 #   4. `curl -sSL -o` writes a 404 body to disk and exits 0, so missing templates
 #      installed as broken scripts while the installer reported success.
 #   5. locales/en.json had no indicator word list, so every prompt scored zero breaches.
+#      The word lists now live in templates/indicators.json, one per language, and
+#      test-indicators.py guards their contents. This file only checks they get installed
+#      and that a breach is still counted end to end.
 #
 # Each case installs into a throwaway HOME over a settings.json that already holds an
 # unrelated hook, then exercises the installed plugin for real.

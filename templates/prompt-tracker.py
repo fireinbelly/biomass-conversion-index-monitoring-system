@@ -6,27 +6,41 @@ from datetime import datetime
 import re
 from pathlib import Path
 
-# i18n.py and locales/ are installed alongside this script.
-sys.path.insert(0, str(Path(__file__).parent))
-from i18n import _, _list
+# indicators.json is installed alongside this script. It holds one word list per
+# language and every list is checked, whatever LANG says: people swear in their first
+# language with their locale set to en_US.
+INDICATORS_FILE = Path(__file__).parent / 'indicators.json'
+
+# Chinese, Japanese, Korean, Thai and Bopomofo don't put spaces between words, so a term
+# in one of those scripts has no word boundary to anchor to - 幹你娘 sits in an unbroken
+# run of characters. Those terms are matched as plain substrings; everything else keeps
+# whole-word matching, which is what stops `classic` tripping `ass`.
+NO_SPACES = re.compile(
+    '[฀-๿'              # thai
+    '぀-ヿ'               # hiragana, katakana
+    '㄀-ㄯ'               # bopomofo
+    '㄰-㆏'               # hangul jamo
+    '㐀-䶿一-鿿豈-﫿'   # cjk ideographs
+    '가-힯]'              # hangul syllables
+)
 
 def count_curse_words(text):
     """Count biomass conversion indicators in text"""
-    # Get indicators from localization
-    curse_words = _list('indicators.curse_words')
-    
-    # Convert to lowercase and split into words
-    words = re.findall(r'\b\w+\b', text.lower())
-    
-    curse_count = 0
-    found_curses = []
-    
-    for word in words:
-        if word in curse_words:
-            curse_count += 1
-            found_curses.append(word)
-    
-    return curse_count, found_curses
+    with open(INDICATORS_FILE, encoding='utf-8') as handle:
+        by_language = json.load(handle)['curse_words']
+
+    # One regex over every language. Longest terms first, so 幹你娘 wins over 屌 where
+    # they overlap and a single scan counts each hit exactly once.
+    terms = {term for words in by_language.values() for term in words}
+    parts = [re.escape(t) if NO_SPACES.search(t) else r'(?<!\w)%s(?!\w)' % re.escape(t)
+             for t in sorted(terms, key=len, reverse=True)]
+    if not parts:
+        # An empty alternation is the empty pattern, which matches at every position and
+        # would score a breach per character. An empty list means zero, not everything.
+        return 0, []
+
+    found = [m.group(0) for m in re.finditer('|'.join(parts), text.lower())]
+    return len(found), found
 
 def save_prompt_data(prompt, curse_count, found_curses):
     """Save prompt data to storage"""
