@@ -45,16 +45,27 @@ def load_prompt_data(start_date=None, end_date=None):
 def calculate_stats(data, period="daily"):
     """Calculate biomass conversion index statistics."""
     if not data:
-        return {"total_prompts": 0, "total_curses": 0, "average_curses_per_prompt": 0, "stats_by_period": {}}
-    
+        return {"total_prompts": 0, "total_curses": 0, "average_curses_per_prompt": 0,
+                "stats_by_period": {}, "stats_by_model": {}}
+
     total_prompts = len(data)
     total_curses = sum(entry['curse_count'] for entry in data)
-    
+
     # Group by period
     stats_by_period = defaultdict(lambda: {"prompts": 0, "curses": 0, "curse_words": Counter()})
-    
+    # Group by the model that earned the breach. Entries logged before the tracker
+    # recorded a model have no key at all, which is not the same as a model named
+    # "unknown" - print_stats labels it, this keeps the data honest.
+    stats_by_model = defaultdict(lambda: {"prompts": 0, "curses": 0, "curse_words": Counter()})
+
     for entry in data:
         dt = datetime.fromisoformat(entry['timestamp'])
+
+        model_stats = stats_by_model[entry.get('model')]
+        model_stats["prompts"] += 1
+        model_stats["curses"] += entry['curse_count']
+        for curse in entry['found_curses']:
+            model_stats["curse_words"][curse] += 1
         
         if period == "daily":
             key = dt.strftime("%Y-%m-%d")
@@ -78,7 +89,8 @@ def calculate_stats(data, period="daily"):
         "total_prompts": total_prompts,
         "total_curses": total_curses,
         "average_curses_per_prompt": total_curses / total_prompts if total_prompts > 0 else 0,
-        "stats_by_period": dict(stats_by_period)
+        "stats_by_period": dict(stats_by_period),
+        "stats_by_model": dict(stats_by_model)
     }
 
 def print_stats(stats, period="daily"):
@@ -94,7 +106,30 @@ def print_stats(stats, period="daily"):
     print(_('stats.total_prompts', count=stats['total_prompts']))
     print(_('stats.total_breaches', count=stats['total_curses']))
     print(_('stats.average_deviation', value=f"{stats['average_curses_per_prompt']:.2f}"))
-    
+
+    by_model = stats.get('stats_by_model') or {}
+    if by_model:
+        print(f"\n{_('stats.by_model_title')}")
+        print("-" * 30)
+
+        # Worst offender first. Rate decides ties and is the interesting number, but
+        # volume leads, because one breach out of two prompts is not a trend.
+        ranked = sorted(by_model.items(),
+                        key=lambda kv: (kv[1]['curses'], kv[1]['curses'] / kv[1]['prompts']),
+                        reverse=True)
+        width = max(len(m or _('stats.model_unknown')) for m in by_model)
+
+        for model, model_stats in ranked:
+            rate = model_stats['curses'] / model_stats['prompts']
+            print("  {:<{w}}  {}".format(
+                model or _('stats.model_unknown'), _('stats.model_row',
+                    breaches=model_stats['curses'], prompts=model_stats['prompts'],
+                    rate=f"{rate:.2f}"), w=width))
+            if model_stats['curse_words']:
+                types_list = ', '.join(f'{word}({count})'
+                                       for word, count in model_stats['curse_words'].most_common(3))
+                print("  {:<{w}}  {}".format('', _('stats.predominant_types', types=types_list), w=width))
+
     if stats['stats_by_period']:
         print(f"\n{_('stats.breakdown_title', period=period_localized)}")
         print("-" * 30)

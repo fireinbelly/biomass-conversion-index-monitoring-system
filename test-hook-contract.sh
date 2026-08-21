@@ -26,9 +26,21 @@ set -u
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REAL_HOME="$HOME"
 PROMPT='why the hell is this damn build failing'
-PAYLOAD="{\"session_id\":\"s1\",\"transcript_path\":\"/tmp/t.jsonl\",\"cwd\":\"/tmp\",\"hook_event_name\":\"UserPromptSubmit\",\"prompt\":\"$PROMPT\"}"
 PASS=0
 FAIL=0
+
+# The hook gets no model field, so the tracker reads the last assistant message out of
+# the transcript instead. That needs a real transcript to read, not a path that happens
+# not to exist - otherwise "model": null passes for the wrong reason.
+TRANSCRIPT="$(mktemp -t bci-transcript)"
+cat > "$TRANSCRIPT" <<'TRANSCRIPT_EOF'
+{"type":"user","message":{"role":"user","content":"hi"}}
+{"type":"assistant","message":{"role":"assistant","model":"claude-sonnet-5","content":[]}}
+{"type":"assistant","message":{"role":"assistant","model":"claude-opus-5","content":[]}}
+TRANSCRIPT_EOF
+trap 'rm -f "$TRANSCRIPT"' EXIT
+
+PAYLOAD="{\"session_id\":\"s1\",\"transcript_path\":\"$TRANSCRIPT\",\"cwd\":\"/tmp\",\"hook_event_name\":\"UserPromptSubmit\",\"prompt\":\"$PROMPT\"}"
 
 # "label|flags|expected install dir (project|user)"
 CASES="
@@ -144,6 +156,32 @@ assert sorted(entry['found_curses']) == ['damn', 'hell'], entry['found_curses']
 VERIFY
     then check ok "logs the prompt and counts breaches"
     else check bad "logs the prompt and counts breaches"
+    fi
+
+    # --- the model that earned the breach comes from the transcript's last assistant ---
+    if python3 - "$LOGFILE" <<'VERIFY'
+import json, sys
+entry = json.loads(open(sys.argv[1]).read().strip().splitlines()[0])
+assert 'model' in entry, 'no model key recorded'
+assert entry['model'] == 'claude-opus-5', 'expected the LAST assistant model, got %r' % entry['model']
+VERIFY
+    then check ok "records the model being sworn at"
+    else check bad "records the model being sworn at"
+    fi
+
+    # --- a CJK breach and ascii slang both land, against the installed word lists -----
+    # Its own data dir: writing into $DATA would change the totals curse-stats.py is
+    # checked against below.
+    if printf '%s' "$(python3 -c 'import json;print(json.dumps({"session_id":"s2","hook_event_name":"UserPromptSubmit","prompt":"幹你娘 this e04 build"}))')" \
+        | BIOMASS_DATA_DIR="$SANDBOX/cjk" python3 "$TRACKER" >/dev/null 2>&1 \
+        && python3 - "$SANDBOX/cjk" <<'VERIFY'
+import glob, json, sys
+path = glob.glob(sys.argv[1] + '/*.jsonl')[0]
+entry = json.loads(open(path, encoding='utf-8').read().strip().splitlines()[-1])
+assert sorted(entry['found_curses']) == ['e04', '幹你娘'], entry['found_curses']
+VERIFY
+    then check ok "matches CJK substrings and ascii slang"
+    else check bad "matches CJK substrings and ascii slang"
     fi
 
     # --- the stats script must run and report those breaches ---

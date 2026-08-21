@@ -11,6 +11,9 @@ from pathlib import Path
 # language with their locale set to en_US.
 INDICATORS_FILE = Path(__file__).parent / 'indicators.json'
 
+# How much of the end of the transcript detect_model() reads. See its docstring.
+TRANSCRIPT_TAIL_BYTES = 1_000_000
+
 # Chinese, Japanese, Korean, Thai and Bopomofo don't put spaces between words, so a term
 # in one of those scripts has no word boundary to anchor to - 幹你娘 sits in an unbroken
 # run of characters. Those terms are matched as plain substrings; everything else keeps
@@ -42,7 +45,42 @@ def count_curse_words(text):
     found = [m.group(0) for m in re.finditer('|'.join(parts), text.lower())]
     return len(found), found
 
-def save_prompt_data(prompt, curse_count, found_curses):
+def detect_model(transcript_path):
+    """Which model is being sworn at.
+
+    UserPromptSubmit hooks get no model field and there is no $CLAUDE_MODEL, so it has
+    to come from the transcript. The last assistant message is the turn the user is
+    reacting to, which is exactly the model that earned the breach.
+
+    Only the tail is read: the model is on every assistant line, transcripts run to
+    hundreds of MB, and this is on the path of every prompt you submit. 1 MB agrees with
+    a full scan on every transcript tested; when it doesn't, the answer is None rather
+    than a guess.
+    """
+    if not transcript_path or not os.path.exists(transcript_path):
+        return None
+
+    size = os.path.getsize(transcript_path)
+    with open(transcript_path, 'rb') as handle:
+        handle.seek(max(0, size - TRANSCRIPT_TAIL_BYTES))
+        lines = handle.read().split(b'\n')
+    if size > TRANSCRIPT_TAIL_BYTES:
+        lines = lines[1:]  # the first line is cut in half by the seek
+
+    for raw in reversed(lines):
+        if not raw.strip():
+            continue
+        try:
+            entry = json.loads(raw)
+        except ValueError:
+            continue
+        if entry.get('type') == 'assistant':
+            model = (entry.get('message') or {}).get('model')
+            if model:
+                return model
+    return None
+
+def save_prompt_data(prompt, curse_count, found_curses, model=None):
     """Save prompt data to storage"""
     # Use data directory from environment or default
     data_dir = os.environ.get('BIOMASS_DATA_DIR', os.path.expanduser("~/.claude/prompt-data"))
@@ -54,6 +92,7 @@ def save_prompt_data(prompt, curse_count, found_curses):
         "prompt": prompt,
         "curse_count": curse_count,
         "found_curses": found_curses,
+        "model": model,
         "date": datetime.now().strftime("%Y-%m-%d"),
         "hour": datetime.now().hour
     }
@@ -77,7 +116,8 @@ def main():
         payload = json.loads(sys.stdin.read())
         prompt = payload['prompt']
         curse_count, found_curses = count_curse_words(prompt)
-        save_prompt_data(prompt, curse_count, found_curses)
+        save_prompt_data(prompt, curse_count, found_curses,
+                         detect_model(payload.get('transcript_path')))
     except Exception:
         pass
 

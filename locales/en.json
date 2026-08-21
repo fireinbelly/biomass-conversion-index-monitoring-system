@@ -51,7 +51,10 @@
     "breach_count": "Breach Count: {count}",
     "predominant_types": "Predominant Breach Types: {types}",
     "date_range": "Date range: {start} to {end}",
-    "no_breaches_today": "No harmony breaches today! 🌿"
+    "no_breaches_today": "No harmony breaches today! 🌿",
+    "by_model_title": "Breaches by Model (who made you say it):",
+    "model_row": "{breaches} breaches / {prompts} prompts  ({rate} per prompt)",
+    "model_unknown": "unrecorded"
   },
   "periods": {
     "daily": "Daily",

@@ -159,6 +159,14 @@ Total Prompts: 29
 Total Harmony Breaches: 22
 Average Harmony Deviation Index: 0.76
 
+Breaches by Model (who made you say it):
+------------------------------
+  claude-opus-5    14 breaches / 18 prompts  (0.78 per prompt)
+                   Predominant Breach Types: damn(3), shit(2), 幹你娘(1)
+  claude-haiku-4-5  8 breaches / 9 prompts   (0.89 per prompt)
+                   Predominant Breach Types: hell(2), fuck(2), crap(1)
+  unrecorded        0 breaches / 2 prompts   (0.00 per prompt)
+
 Breakdown by Daily:
 ------------------------------
 
@@ -169,6 +177,24 @@ Breakdown by Daily:
 ```
 
 Twenty-two breaches out of twenty-nine prompts. That's a 76% strike rate. *Golf clap.*
+
+### Which model made you say it
+
+Every entry records the model that earned it, so you can finally settle whether Haiku
+really is more infuriating or whether you're just like that.
+
+`UserPromptSubmit` hooks are handed no model field and there is no `$CLAUDE_MODEL`, so
+the tracker reads the **last assistant message in the transcript** instead. That is the
+turn you're reacting to, which is the model that deserves the blame. Two consequences
+worth knowing:
+
+- The first prompt of a session has no assistant turn to read yet, so it records
+  `null` and reports as `unrecorded`.
+- If you `/model` mid-session, the first prompt after the switch is still attributed to
+  the outgoing model. It answered last; it earned it.
+
+Entries written before this existed have no `model` key at all. They report as
+`unrecorded` rather than being back-filled with a guess.
 
 ### Digital Amnesia Output
 
@@ -385,7 +411,9 @@ The boring but necessary stuff:
 
 1. Python 3.6+ (because we're not animals)
 2. Standard library only—no pip install nightmare, no dependencies phoning home
-3. < 1ms performance impact per prompt (you won't even notice the *local* surveillance)
+3. ~40ms per prompt, measured end to end against a 133MB transcript: python startup,
+   compiling 931 terms into one regex, and a 1MB tail read to find the model. The hook
+   timeout is 5s, so there's room to spare
 4. Atomic file operations because corrupted shame data helps nobody
 5. Works on macOS, Linux, Windows (discrimination-free monitoring)
 6. **ZERO network calls** - check the source, we don't even import `urllib` or `requests`
