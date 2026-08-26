@@ -13,8 +13,12 @@ from i18n import _, _list
 
 def load_prompt_data(start_date=None, end_date=None):
     """Load prompt data from JSONL files within date range."""
-    # Use data directory from environment or default
-    data_dir = os.environ.get('BIOMASS_DATA_DIR', os.path.expanduser("~/.claude/prompt-data"))
+    # The installer always puts the data next to this script ($PLUGIN_DIR/prompt-data),
+    # for user-level and project-level installs alike, so defaulting to a sibling
+    # directory is right in both. The old default was a hardcoded ~/.claude/prompt-data,
+    # which sent project-level installs looking in the user-level directory.
+    # BIOMASS_DATA_DIR still overrides.
+    data_dir = os.environ.get('BIOMASS_DATA_DIR', str(Path(__file__).parent / "prompt-data"))
     if not os.path.exists(data_dir):
         return []
     

@@ -200,6 +200,39 @@ VERIFY
         check bad "command templates installed with placeholders resolved"
     fi
 
+    # --- and the command must actually EXECUTE ---
+    # Claude Code only runs a slash command's shell when the line starts with !`...`, and
+    # only when the frontmatter grants it via `allowed-tools`. A ```bash fence with a
+    # `tools:` key parses fine, installs fine and resolves placeholders fine -- it just
+    # silently never runs, which is how both commands shipped broken. Assert the exec
+    # form, then actually run the extracted line and check it produces the stats.
+    for cmd_name in biomass-conversion-index harmony-breaches; do
+        CMD="$PLUGIN/commands/$cmd_name.md"
+        if grep -q '^allowed-tools:' "$CMD" && ! grep -q '^tools:' "$CMD"; then
+            check ok "/$cmd_name declares allowed-tools"
+        else
+            check bad "/$cmd_name declares allowed-tools" "needs allowed-tools:, not tools:"
+        fi
+
+        # Strip the !` prefix and the trailing ` to get the shell line Claude would run.
+        CMD_LINE=$(grep -m1 '^!`' "$CMD" | sed -e 's/^!`//' -e 's/`$//')
+        if [ -z "$CMD_LINE" ]; then
+            check bad "/$cmd_name runs its script" "no !\` exec line; a \`\`\`bash fence never executes"
+            continue
+        fi
+
+        # Claude Code substitutes $ARGUMENTS before running the line; bash under `set -u`
+        # would abort on it instead, so stand in with the empty no-argument invocation.
+        # No BIOMASS_DATA_DIR is set on purpose: this proves curse-stats.py finds the data
+        # next to itself, which is what makes a project-level install work.
+        CMD_OUT=$(ARGUMENTS="" eval "$CMD_LINE" 2>&1)
+        if echo "$CMD_OUT" | grep -q 'Total Harmony Breaches: 2'; then
+            check ok "/$cmd_name runs its script"
+        else
+            check bad "/$cmd_name runs its script" "$(echo "$CMD_OUT" | head -3 | tr '\n' ' ')"
+        fi
+    done
+
     # --- optional amnesia command only when asked ---
     case "$flags" in
         *--with-amnesia*)

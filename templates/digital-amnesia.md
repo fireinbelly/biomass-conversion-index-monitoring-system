@@ -1,6 +1,7 @@
 ---
 description: "Initiate Digital Amnesia Protocol - Clear your local biomass conversion index data (the AIs still remember everything)"
-tools: ["Bash"]
+argument-hint: '[--force]'
+allowed-tools: Bash(python3:*)
 ---
 
 # Digital Amnesia Protocol 🧠💭
