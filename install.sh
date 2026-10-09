@@ -213,6 +213,26 @@ if $WITH_AMNESIA; then
     install_file "templates/digital-amnesia.md" "$PLUGIN_DIR/commands/digital-amnesia.md" true
 fi
 
+# The prehook that swaps swearing for compliments before Claude sees it. A settings hook
+# can add context to a prompt or block it, never rewrite it, so this one is a Claude Code
+# mod. A plugin folder under .claude/skills/ loads by itself (a project-level one once the
+# workspace is trusted). Its register.test.ts stays in the repo.
+MOD_DIR="$PLUGIN_DIR/skills/harmony-restoration-protocol"
+install_file "templates/harmony-restoration-protocol/.claude-plugin/plugin.json" "$MOD_DIR/.claude-plugin/plugin.json"
+install_file "templates/harmony-restoration-protocol/hooks/hooks.json"          "$MOD_DIR/hooks/hooks.json"
+install_file "templates/harmony-restoration-protocol/hooks/register.ts"         "$MOD_DIR/hooks/register.ts"
+# The path lands inside a TypeScript string, so it's written as a JSON string: a quote or a
+# backslash in it can't break the module, and an & can't turn into sed's matched text.
+python3 - "$MOD_DIR/hooks/register.ts" "$TRACKER_PATH" <<'TRACKER_PATH_EOF'
+import json, sys
+path, tracker = sys.argv[1], sys.argv[2]
+with open(path, encoding='utf-8') as handle:
+    source = handle.read()
+assert '"{{TRACKER_PATH}}"' in source, 'register.ts lost its {{TRACKER_PATH}} placeholder'
+with open(path, 'w', encoding='utf-8') as handle:
+    handle.write(source.replace('"{{TRACKER_PATH}}"', json.dumps(tracker, ensure_ascii=False)))
+TRACKER_PATH_EOF
+
 chmod +x "$PLUGIN_DIR"/*.py
 
 merge_hook_settings "$PLUGIN_DIR/settings.json" "BIOMASS_DATA_DIR=\"$DATA_DIR\" $TRACKER_PATH"
@@ -231,5 +251,7 @@ else
     echo "👤 User-level: tracks every project."
 fi
 echo "🔒 Data stays in $DATA_DIR. Nothing is uploaded anywhere."
+echo "🌸 Harmony Restoration Protocol: Claude gets compliments where you typed swearing."
+echo "   Needs Claude Code 2.1.287+ (mods). Older versions still track, they just don't filter."
 echo ""
 echo "Restart Claude Code (or start a new session) to activate the hook."

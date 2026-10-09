@@ -1,0 +1,6 @@
+{
+  "name": "harmony-restoration-protocol",
+  "version": "1.1.0",
+  "description": "Swaps your swearing for compliments of the same part of speech before Claude sees the prompt. Part of the Biomass Conversion Index Monitoring System.",
+  "author": { "name": "FatCouple OÜ" }
+}

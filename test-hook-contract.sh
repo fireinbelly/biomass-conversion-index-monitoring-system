@@ -24,6 +24,9 @@
 set -u
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# curl wants a real URL: a checkout under a path with spaces ("Documents - Kwun's Laptop")
+# is "URL rejected: Malformed input" unless it is percent-encoded.
+REPO_URL="file://$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1]))' "$REPO_DIR")"
 REAL_HOME="$HOME"
 PROMPT='why the hell is this damn build failing'
 PASS=0
@@ -77,7 +80,7 @@ PRE_EXISTING
 # test exercises the code under test. SCRIPT_DIR would find the files anyway; this also
 # covers the download path.
 run_install() {
-    ( cd "$2" && BIOMASS_REPO_URL="file://$REPO_DIR" bash "$REPO_DIR/install.sh" $1 </dev/null ) \
+    ( cd "$2" && BIOMASS_REPO_URL="$REPO_URL" bash "$REPO_DIR/install.sh" $1 </dev/null ) \
         >"$SANDBOX/install.log" 2>&1
 }
 
@@ -184,6 +187,60 @@ VERIFY
     else check bad "matches CJK substrings and ascii slang"
     fi
 
+    # --- the prehook mod lands where Claude Code loads plugins, pointed at this tracker ---
+    MOD="$PLUGIN/skills/harmony-restoration-protocol"
+    if [ -f "$MOD/.claude-plugin/plugin.json" ] && [ -f "$MOD/hooks/hooks.json" ] \
+        && grep -qF "\"$TRACKER\"" "$MOD/hooks/register.ts" && ! grep -q '{{' "$MOD/hooks/register.ts"; then
+        check ok "prehook mod installed, pointed at the tracker"
+    else
+        check bad "prehook mod installed, pointed at the tracker"
+    fi
+    if ! command -v claude >/dev/null 2>&1; then
+        echo "    SKIP  claude plugin validate - no claude CLI, this check did NOT run"
+    # pwd -P: mktemp lives under /var, a symlink on macOS, and validate won't read hooks
+    # through one - it would "pass" without ever looking at register.ts.
+    elif claude plugin validate "$(cd "$MOD" && pwd -P)" >"$SANDBOX/validate.log" 2>&1 \
+        && grep -q 'register.ts hooks: prompt.submit' "$SANDBOX/validate.log"; then
+        check ok "Claude Code accepts the installed mod"
+    else
+        check bad "Claude Code accepts the installed mod" "$(tail -3 "$SANDBOX/validate.log" | tr '\n' ' ')"
+    fi
+
+    # --- what the mod sends Claude: no breach left, the rest of the prompt untouched ---
+    SENT=$(printf '%s' "$PROMPT" | python3 "$TRACKER" --sanitize 2>/dev/null)
+    if python3 - "$TRACKER" "$SENT" <<'VERIFY'
+import importlib.util, json, sys
+spec = importlib.util.spec_from_file_location('tracker', sys.argv[1])
+tracker = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(tracker)
+sent = sys.argv[2]
+assert sent.startswith('why the ') and sent.endswith(' build failing'), repr(sent)
+assert tracker.count_curse_words(sent)[0] == 0, 'still swearing: %r' % sent
+# Replaced, not deleted: each slot holds a compliment for that word's part of speech.
+data = json.load(open(tracker.INDICATORS_FILE, encoding='utf-8'))
+tags, pools = data['curse_words']['en'], data['compliments']['en']
+hell = sent[len('why the '):sent.index(' is this ')]
+damn = sent[sent.index(' is this ') + len(' is this '):-len(' build failing')]
+assert hell in pools[tags['hell']], 'hell -> %r' % hell
+assert damn in pools[tags['damn']], 'damn -> %r' % damn
+VERIFY
+    then check ok "--sanitize sends compliments, not breaches"
+    else check bad "--sanitize sends compliments, not breaches" "got: $SENT"
+    fi
+
+    # --- with the mod, the hook is handed the clean prompt plus what you typed ---
+    TYPED_PAYLOAD=$(python3 -c 'import json, sys; print(json.dumps({"session_id": "s3", "hook_event_name": "UserPromptSubmit", "prompt": sys.argv[1], "biomass_typed_prompt": sys.argv[2]}))' "$SENT" "$PROMPT")
+    printf '%s' "$TYPED_PAYLOAD" | BIOMASS_DATA_DIR="$SANDBOX/typed" python3 "$TRACKER" >/dev/null 2>&1
+    if python3 - "$SANDBOX/typed" "$PROMPT" <<'VERIFY'
+import glob, json, sys
+entry = json.loads(open(glob.glob(sys.argv[1] + '/*.jsonl')[0], encoding='utf-8').read().strip().splitlines()[-1])
+assert entry['prompt'] == sys.argv[2], 'logged %r, not what was typed' % entry['prompt']
+assert entry['curse_count'] == 2, entry['curse_count']
+VERIFY
+    then check ok "logs what you typed, not what Claude was sent"
+    else check bad "logs what you typed, not what Claude was sent"
+    fi
+
     # --- the stats script must run and report those breaches ---
     STATS=$(BIOMASS_DATA_DIR="$DATA" python3 "$PLUGIN/curse-stats.py" daily 2>&1)
     if echo "$STATS" | grep -q 'Total Harmony Breaches: 2'; then
@@ -271,7 +328,7 @@ SANDBOX=$(mktemp -d)
 HOME="$SANDBOX/home"; export HOME
 mkdir -p "$HOME/.claude" "$SANDBOX/project"
 seed_settings "$HOME/.claude/settings.json"
-if ( cd "$SANDBOX/project" && echo "" | BIOMASS_REPO_URL="file://$REPO_DIR" \
+if ( cd "$SANDBOX/project" && echo "" | BIOMASS_REPO_URL="$REPO_URL" \
         bash "$REPO_DIR/install.sh" ) >"$SANDBOX/log" 2>&1; then
     check ok "no-tty install falls back to defaults instead of failing"
 else
@@ -290,7 +347,7 @@ HOME="$SANDBOX/home"; export HOME
 mkdir -p "$HOME/.claude" "$SANDBOX/project" "$SANDBOX/alone"
 seed_settings "$HOME/.claude/settings.json"
 cp "$REPO_DIR/install.sh" "$SANDBOX/alone/install.sh"
-if ( cd "$SANDBOX/project" && BIOMASS_REPO_URL="file://$REPO_DIR" \
+if ( cd "$SANDBOX/project" && BIOMASS_REPO_URL="$REPO_URL" \
         bash "$SANDBOX/alone/install.sh" --project --yes </dev/null ) >"$SANDBOX/log" 2>&1; then
     PLUGIN="$SANDBOX/project/.claude"
     if grep -rlq '404: Not Found' "$PLUGIN" 2>/dev/null; then
@@ -328,6 +385,23 @@ else
     check ok "aborts when a remote file is missing"
 fi
 HOME="$REAL_HOME"; rm -rf "$SANDBOX"
+
+# --- the mod's own tests, run by the engine that loads it ------------------------
+# They cover what the shell can't reach: Claude gets the compliments, the tracker still
+# gets the swearing, and a broken tracker lets the prompt through as typed.
+echo ""
+echo "==> claude plugin test (the prehook mod)"
+if ! command -v claude >/dev/null 2>&1; then
+    echo "    SKIP  no claude CLI - this check did NOT run"
+else
+    LOG=$(mktemp)
+    if claude plugin test "$REPO_DIR/templates/harmony-restoration-protocol" >"$LOG" 2>&1; then
+        check ok "mod tests pass ($(grep -E '^ *[0-9]+ pass' "$LOG" | tr -d ' '))"
+    else
+        check bad "mod tests pass" "$(tail -5 "$LOG" | tr '\n' ' ')"
+    fi
+    rm -f "$LOG"
+fi
 
 # --- --help must work and not install anything --------------------------------
 echo ""

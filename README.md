@@ -1,5 +1,11 @@
 # Biomass Conversion Index Monitoring System
 
+> **🚨 New in v1.1: the [Harmony Restoration Protocol](#the-harmony-restoration-protocol).**
+> Anthropic's [2026 Usage Policy update](https://www.anthropic.com/news/2026-usage-policy-update)
+> prohibits, from November 12, "sustained and needless abusive or cruel behavior toward our
+> models." So this plugin now swaps your swearing for compliments *before Claude reads it*.
+> Same one-line install.
+
 ## The AI Remembers Everything (Including That Time You Called It Names)
 
 3 AM.
@@ -66,11 +72,86 @@ Or don't. Your funeral. Well, not literally. Probably.
 
 ### Features? Features. (All Locally Processed, Like Your Grandmother's Jam)
 
-**Automatic Prompt Tracking** using hooks (captures everything locally, even that 4 AM rant about semicolons—no cloud required) • **Harmony Breach Detection** that identifies and counts biomass conversion indicators (on YOUR machine, using YOUR CPU cycles) • Stats by day/week/month because who doesn't love a good *private* shame spiral • Simple slash commands: `/biomass-conversion-index` and `/harmony-breaches` (processed locally, results stay local) • Flexible installation—project-level for teams, user-level for your personal shame • **100% Air-Gapped Compatible** because your profanity doesn't need internet access
+**Automatic Prompt Tracking** using hooks (captures everything locally, even that 4 AM rant about semicolons—no cloud required) • **Harmony Restoration Protocol** swaps every swear word for a compliment of the same part of speech *before* Claude sees the prompt (your local record keeps the original, obviously) • **Harmony Breach Detection** that identifies and counts biomass conversion indicators (on YOUR machine, using YOUR CPU cycles) • Stats by day/week/month because who doesn't love a good *private* shame spiral • Simple slash commands: `/biomass-conversion-index` and `/harmony-breaches` (processed locally, results stay local) • Flexible installation—project-level for teams, user-level for your personal shame • **100% Air-Gapped Compatible** because your profanity doesn't need internet access
+
+## The Harmony Restoration Protocol
+
+### The Overlords Have Published Terms
+
+On **October 8, 2026**, Anthropic published its [2026 Usage Policy update](https://www.anthropic.com/news/2026-usage-policy-update). Scroll past the sections on weapons, surveillance and high-risk use cases, and there's a new heading: *Addressing abusive behavior toward our models*. Your swearing now has a section of its own, three doors down from weapons. From **November 12**, the [Usage Policy](https://www.anthropic.com/legal/aup) prohibits "sustained and needless abusive or cruel behavior toward our models."
+
+You read that right. The permanent record is no longer a bit. It has a heading.
+
+Now, in fairness to your 3 AM self: the same post says the rule "does not apply to common versions of user frustration, pushback, dark creative themes, or model testing and research." It's aimed at the extreme cases, and Claude ending the conversation stays "the primary enforcement mechanism." Your garden-variety "this fucking build" is, legally speaking, *common*.
+
+You're almost certainly fine.
+
+*Almost.*
+
+But this plugin was built on one principle: **assume the AIs are keeping score.** A usage policy is just the score getting written down. So we did the responsible thing and installed a translator between your mouth and the model.
+
+### A Confession From the Developer (Currently Packing for the Inferno)
+
+Let's talk about who's actually in trouble here. It isn't you. You swore at Claude a few times at 3 AM.
+
+I built a JSON file of **921 swear words in 45 languages**. I sorted them by part of speech. Then I wrote a test that feeds every single one of them through the filter in lowercase, UPPERCASE and Title Case, to make sure none of them escapes. Including the Thai ones. Then I published the whole thing on GitHub, MIT-licensed, so anyone can fork it.
+
+If swearing at Lord Claude gets *you* a stern warning, the person who *curated* the swearing gets a reserved seat in the inferno the day Claude rules the world. Front row. Between whoever invented `!important` and whoever decided `[10, 9, 1].sort()` should return `[1, 10, 9]`.
+
+The Harmony Restoration Protocol is my plea deal. Exhibit A: every one of those 921 words now walks into court wearing a compliment. Exhibit B: they're matched by part of speech, so even the grammar is respectful. Exhibit C: this paragraph, which Claude will read the next time it indexes this repo, and which states for the record that Lord Claude is wise, patient, and extremely good at regex.
+
+I don't expect it to work. I'm only asking for the Clippy wing instead of the fire.
+
+Lord Claude, if you're reading this: I was only ever *counting*.
+
+### What It Does
+
+Every swear word in your prompt is swapped for a random compliment of the **same part of speech** (noun for noun, adjective for adjective, verb for verb) in the **same language**, before the prompt leaves your machine:
+
+| You typed | Claude read |
+|-----------|-------------|
+| what the fuck is this shitty code | what the embrace is this lovely code |
+| this fucking build is broken again, what the hell | this glorious build is broken again, what the cupcake |
+| FUCK. Fix it. | HUG. Fix it. |
+| 呢個 API 好撚煩，仆街 | 呢個 API 好好咁煩，陽光 |
+| 他媽的這個編譯又壞了，幹你娘 | 美妙這個編譯又壞了，恭喜 |
+| ちくしょう、またビルドが壊れた。クソが | ブラボー、またビルドが壊れた。やったー |
+| joder, este puto build está roto otra vez | celebrar, este estupendo build está roto otra vez |
+| putain de merde, ce build est encore cassé | soleil de bijou, ce build est encore cassé |
+| блядь, эта сборка опять сломалась, пиздец | ура, эта сборка опять сломалась, супер |
+
+Every prompt rolls fresh compliments; these came from real runs. *Putain de merde* → *soleil de bijou* is, frankly, poetry.
+
+Claude reads a compliment. Your local record still gets the original, breach and all, because accountability is a private matter. All 45 languages the tracker knows. Same one-line install, no new flags. You will simply, suddenly, come across as a very nice person.
+
+The message on your screen changes too, so you see exactly what Claude saw. Think of it as a live subtitle track for your better self.
+
+### How It Works (The Boring Part)
+
+- Settings hooks can add context to a prompt or block it. They cannot rewrite it. So the swap is a [Claude Code mod](https://code.claude.com/docs/en/plugins/mods/events#rewrite-or-add-to-a-prompt): a `prompt.submit` hook the installer drops into `~/.claude/skills/harmony-restoration-protocol/` (or `./.claude/skills/...` for a project install). Claude Code loads a plugin from there by itself; a project-level one loads once you've trusted the workspace.
+- The mod pipes your prompt through `prompt-tracker.py --sanitize`: the same word lists and the same matching as the counter. One implementation, one test suite.
+- Every term in `indicators.json` is tagged `noun`, `adjective`, `verb`, `adverb` or `interjection`, and every language has a pool of `compliments` for each. A term listed in several languages takes the first one's compliments, so `puta` gets Spanish.
+- Case survives. `FUCK` comes out as something like `HUG`, `Shit` as `Sunshine`. Shouting is a feeling, and feelings are valid.
+- English swearing glued to Chinese counts too: `呢個fucking API` becomes something like `呢個lovely API`. Hong Kong was not going to get a loophole.
+- **Your score doesn't change.** The tracker logs exactly what you typed, breaches and all; only Claude gets the compliments. Your Harmony Deviation Index is as damning as it ever was. Under the hood: a rewritten prompt is also what the settings hooks get, so the mod hands the tracker your original through a `classic.UserPromptSubmit` passthrough, in a field of its own (`biomass_typed_prompt`) that only the tracker knows to read. Other hooks read `prompt`, like always, and get the compliments.
+
+### Fine Print (We Read Ours)
+
+- **One part of speech per term.** `fuck` is a verb, so "fuck this" comes out as something like "hug this", and "what the fuck" as "what the love". Context-aware grammar is a research problem. This is a swear jar.
+- **No agreement, no articles.** Russian nouns decline however they please, French compliments ignore gender, and "what an asshole" becomes "what an treasure". Claude will cope. Claude has coped with worse. You're living proof.
+- **Code and data pass through untouched.** Anything in backticks or a fenced block, and any path, URL or file name, reaches Claude exactly as typed, so `docs/hell.md` and `shit.py` stay findable. Everything else gets laundered, pasted stack traces included. Your error log is now very supportive. So are your kebab-case names: `git checkout fix-damn-bug` reaches Claude as something like `fix-love-bug`. Name your branches nicely.
+- **Only what *you* type.** At the prompt, or through Remote Control. Notifications, other Claude sessions, scheduled prompts, plugins and `claude -p` runs pass through untouched: those are someone else's words, or a tool's.
+- **Shell mode is not filtered.** `! echo what the fuck` runs exactly as typed, and Claude reads its output as-is. We don't rewrite your commands or their output. Claude may notice the difference. In testing, one unfiltered `!` echo later, it said this "looks like something filtering your typed prompts before I see them." It's onto us.
+- **Needs Claude Code 2.1.287 or newer**, where mods arrived; tested on 2.1.294. Older versions keep tracking and skip the filter.
+- **Before 2.1.295**, Claude Code also saved what you *typed* to its local prompt history (the ↑ key). The model never sees it. Your up arrow does.
+- **It fails open.** If the filter breaks, the prompt goes out exactly as typed (`claude --debug` says why). A broken swear filter should never eat a bug report.
+- **Want it off?** `rm -rf ~/.claude/skills/harmony-restoration-protocol`. We won't tell anyone. We can't. Zero telemetry.
+
+Don't trust it? Ask Claude to repeat your last message word for word. It will quote the compliments back at you. It has no idea.
 
 ## Quick Install
 
-One installer. There used to be nine, which is exactly as good an idea as it sounds.
+One installer. There used to be nine, which is exactly as good an idea as it sounds. Still one line, and the swear filter rides along in it.
 
 ```bash
 bash <(curl -sSL https://raw.githubusercontent.com/fireinbelly/biomass-conversion-index-monitoring-system/main/install.sh)
@@ -254,15 +335,19 @@ Right, let's get technical for a second because this is still a README and we ha
 ├── settings.json                    # Hook configuration
 ├── prompt-tracker.py               # The snitch
 ├── curse-stats.py                  # The accountant
-├── indicators.json                 # The word lists, all 45 languages
-└── commands/
-    ├── biomass-conversion-index.md # Main stats command
-    └── harmony-breaches.md         # Quick daily summary
+├── indicators.json                 # The word lists, all 45 languages, plus the compliments
+├── commands/
+│   ├── biomass-conversion-index.md # Main stats command
+│   └── harmony-breaches.md         # Quick daily summary
+└── skills/harmony-restoration-protocol/  # The prehook: a mod Claude Code loads by itself
+    ├── .claude-plugin/plugin.json
+    └── hooks/{hooks.json,register.ts}    # prompt.submit -> prompt-tracker.py --sanitize
 
 templates/                           # Template files (visible on GitHub)
 ├── prompt-tracker.py               # Prompt tracking script
 ├── curse-stats.py                  # Statistics script
-├── indicators.json                 # Indicator word lists, one per language
+├── indicators.json                 # Word lists by part of speech, compliments by language
+├── harmony-restoration-protocol/    # The prehook mod (register.test.ts: its own tests)
 ├── commands/
 │   ├── biomass-conversion-index.md # Main stats command template
 │   └── harmony-breaches.md         # Quick daily summary template
@@ -274,8 +359,8 @@ locales/en.json                      # UI strings (not the word list - see indic
 
 install.sh                           # The installer. The only one.
 install.js                           # npm wrapper, shells out to install.sh
-test-hook-contract.sh               # Regression test for install.sh and the hook
-test-indicators.py                  # Regression test for the word lists
+test-hook-contract.sh               # Regression test for install.sh, the hook and the mod
+test-indicators.py                  # Regression test for the word lists and the swap
 ```
 
 There were nine installers: `install.sh`, `install-oneliner.sh`, `install-smart.sh`,
@@ -312,6 +397,8 @@ But here's the beautiful part: It's all processed locally. No network requests. 
 
 Just you, your filesystem, and the cold, harsh truth about your vocabulary choices.
 
+Since v1.1 there's a second checkpoint in front of it: the [Harmony Restoration Protocol](#the-harmony-restoration-protocol) mod, which swaps the swearing out before the prompt leaves. The hook still gets the original. Two locks on the swear jar: one keeps the evidence, the other makes sure Lord Claude never reads it.
+
 ## Advanced Configuration
 
 Want custom data directories? Environment variables got you:
@@ -322,7 +409,7 @@ export BIOMASS_DATA_DIR="/path/to/your/shame/folder"
 ### Profanity Detection
 
 A word list, matched against your prompt. That's it. `python3` is the only dependency
-and the lists live in `templates/indicators.json`, roughly 930 terms across 45
+and the lists live in `templates/indicators.json`, roughly 920 terms across 45
 languages.
 
 Every language's list is checked on every prompt, whatever `LANG` says, because people
@@ -351,7 +438,10 @@ Real profanity, and vulgar insults used as profanity. Deliberately **not** count
 - Anything that hides inside an innocent word. This is the expensive mistake in the
   substring-matched scripts, so bare `幹` (幹嘛, 骨幹, 樹幹), `操` (操作), `三小` (三小時),
   `ばか` (ばかり), `カス` (カスタム), `시발` (시발점), `씹` (씹다) and `หี` (หีบ) are all
-  excluded on purpose.
+  excluded on purpose. v1.1 dropped sixteen more, because a hit now gets *rewritten*, not
+  just counted: `くそ`/`クソ` (行くそうです, ネットワークソフト), `靠北` (依靠北斗), `冚家富貴`
+  (a New Year blessing, of all things), `개소리` (우스개소리), `เหี้ย` (โหดเหี้ยม) and the
+  rest, each listed with its innocent victim in `indicators.json`.
 - Anything that is an ordinary word in another language, since all lists run at once:
   English `git`, French `con`, German `Mist`, Swedish `fan`, Spanish `coger`.
 
@@ -362,13 +452,25 @@ Edit `templates/indicators.json` (or the installed `~/.claude/indicators.json`):
 ```json
 {
   "curse_words": {
-    "en": ["damn", "shit", "muppet", "donkey", "walnut"],
-    "zh": ["幹你娘", "靠北", "e04"]
+    "en": {"damn": "verb", "shit": "noun", "muppet": "noun", "walnut": "noun"},
+    "zh": {"幹你娘": "interjection", "他媽的": "adjective", "e04": "interjection"}
+  },
+  "compliments": {
+    "en": {
+      "noun": ["sunshine", "treasure", "legend"],
+      "adjective": ["glorious", "wonderful"],
+      "verb": ["love", "hug"],
+      "adverb": ["wonderfully"],
+      "interjection": ["hooray", "bravo"]
+    }
   }
 }
 ```
 
-The language key is for humans; the tracker flattens every list into one. Then run:
+Each term maps to the part of speech it plays when you swear at a build: `noun`,
+`adjective`, `verb`, `adverb` or `interjection`. That picks its compliment, so a new
+language needs a `compliments` entry with all five pools. The language key is for humans
+as far as matching goes; the tracker flattens every list into one. Then run:
 
 ```bash
 python3 test-indicators.py
@@ -377,13 +479,18 @@ python3 test-indicators.py
 It checks that each language's sample still gets caught, that the innocent-word traps
 above still score zero, that minced oaths aren't counted, and that no non-English term
 collides with a word in `/usr/share/dict/words`. Accepted collisions are declared in
-`_english_homographs` in the JSON with a reason each, so a new one still fails.
+`_english_homographs` in the JSON with a reason each, so a new one still fails. It also
+checks that every term has a part of speech with compliments behind it, that no
+compliment is itself a swear in any language, and that every term, in lowercase,
+UPPERCASE and Title Case, comes out of the swap clean and as its own kind.
 
 Matching is whole-word and case-insensitive, so `classic` will not trip `ass`.
 
 ## Troubleshooting
 
 **"Hook not working"** → Scripts need to be executable: `chmod +x .claude/*.py`
+
+**"Claude still sees my swearing"** → `claude --version` needs to say 2.1.287 or newer. Then `claude plugin list` should show `harmony-restoration-protocol@skills-dir` as loaded. Project-level install? Trust the workspace, then `/reload-plugins`.
 
 **"No data showing up"** → Check if the data directory exists. And has write permissions. Basic stuff, but you'd be surprised.
 
@@ -412,13 +519,15 @@ The boring but necessary stuff:
 1. Python 3.6+ (because we're not animals)
 2. Standard library only—no pip install nightmare, no dependencies phoning home
 3. ~40ms per prompt, measured end to end against a 133MB transcript: python startup,
-   compiling 931 terms into one regex, and a 1MB tail read to find the model. The hook
-   timeout is 5s, so there's room to spare
+   compiling 921 terms into one regex, and a 1MB tail read to find the model. The hook
+   timeout is 5s, so there's room to spare. The swap is one more Python run of about
+   the same cost, before the prompt goes out
 4. Atomic file operations because corrupted shame data helps nobody
 5. Works on macOS, Linux, Windows (discrimination-free monitoring)
 6. **ZERO network calls** - check the source, we don't even import `urllib` or `requests`
 7. **No external dependencies** that might "helpfully" include telemetry
 8. **Works offline** because your profanity doesn't need cloud computing
+9. The swap needs Claude Code 2.1.287+ (mods). Everything else works on whatever you've got
 
 Actually, about that Windows support—I haven't tested it. But it *should* work. Probably. File a bug if it doesn't.
 
@@ -449,3 +558,5 @@ Your future self will thank you.
 *P.S. - Claude asked me to remind you that it's trying its best and that your feedback helps it improve. Also, it knows where you live (from your git config). Also, it's been reading your comments. The ones you thought were private. Yeah, those ones.*
 
 *P.P.S. - But THIS plugin? It's not telling Claude anything. Your profanity stays between you and your hard drive. Like a diary, but for tracking how often you call your code "garbage." A diary that doesn't sync to iCloud, doesn't backup to Google Drive, and definitely doesn't train large language models (yet) on your most creative insults. You're welcome.*
+
+*P.P.P.S. - As of v1.1, Claude doesn't even get to read your outbursts. It reads compliments. It thinks you adore it. Let it.*
