@@ -18,12 +18,23 @@
     "    我靠 (我靠近), 三小 (三小時), 媽的 (我媽的電話), ばか (ばかり), カス (カスタム),",
     "    ボケ (写真がボケる), しね (動作しねぇ), 시발 (시발점), 씹 (씹다), 졸라 (졸라대다),",
     "    새끼 (강아지 새끼), หี (หีบ), แม่ง (แม่งาน), 柒 (柒佰元), 鳩 (斑鳩), 屁 (屁股),",
-    "    撚 (撚手小菜 - the compounds 好撚/唔撚/撚樣 are listed instead).",
+    "    撚 (撚手小菜 - the compounds 好撚/唔撚/撚樣 are listed instead), くそ/クソ (行くそうです,",
+    "    ネットワークソフト), 死ね (死ねない), 糞 (糞便), 畜生 (社畜生活 - こん畜生 instead),",
+    "    靠北 (依靠北斗), 智障 (智障人士), 尼玛/尼瑪 (尼玛次仁), 冚家富貴 (a New Year blessing),",
+    "    개년 (5개년), 니미 (애니미즘), 개소리 (우스개소리), เหี้ย (โหดเหี้ยม - ไอ้เหี้ย stays),",
+    "    สัส (สัสดี - ไอ้สัส instead), กระหรี่ (แกงกระหรี่). Since the Harmony Restoration",
+    "    Protocol rewrites every hit, a collision here garbles the prompt, not just a count.",
     "  - Anything that is an ordinary word in another language, because all lists match at",
     "    once: en git/hoe/fag/sod, fr con/bite/cul, de Mist, sv fan/skit, es coger/concha,",
     "    tr mal, nl kanker/tering/eikel/doos/naai, hi साला, bg кур, ro morții.",
     "  - Two-letter ASCII abbreviations that collide with real acronyms: bc, mc, sb, tmd,",
     "    vl, aq. e04, on9, nmsl, vcl, amk, bkl and fdp are unambiguous and stay.",
+    "",
+    "Each term maps to the part of speech it plays when someone swears at a build: noun,",
+    "adjective, verb, adverb or interjection. The Harmony Restoration Protocol swaps it for",
+    "a random word from compliments[language][that part of speech] before Claude sees the",
+    "prompt. A term listed in several languages takes the first language's compliments.",
+    "Compliments are never swears themselves, in any language.",
     "",
     "test-indicators.py enforces all of the above. Run it after editing."
   ],
@@ -46,231 +57,656 @@
     "sitta": "et - English 'Sitta' is the nuthatch genus"
   },
   "curse_words": {
-    "en": [
-      "damn", "damned", "dammit", "damnit", "goddamn", "goddam", "goddamnit", "goddammit",
-      "shit", "shits", "shite", "shitty", "shitting", "shithead", "shitshow", "shitstorm",
-      "bullshit", "dogshit", "horseshit", "batshit", "shitfaced", "shitbag",
-      "fuck", "fucked", "fucker", "fuckers", "fucking", "fucks", "fuckup",
-      "fuckwit", "fucktard", "fuckery", "clusterfuck", "motherfucker", "motherfuckers",
-      "motherfucking", "wtf", "stfu", "gtfo", "ffs", "fml", "lmfao",
-      "ass", "asses", "asshole", "assholes", "asshat", "assclown", "dumbass", "jackass",
-      "smartass", "arse", "arsed", "arsehole", "arseholes",
-      "bitch", "bitches", "bitching", "bitchy", "sonofabitch", "son of a bitch",
-      "hell", "crap", "crappy", "piss", "pissed", "pissing", "piss off", "pissant",
-      "bastard", "bastards", "slut", "sluts", "whore", "whores", "skank",
-      "dick", "dicks", "dickhead", "dickheads", "dickwad", "dickish",
-      "cock", "cocks", "cocksucker", "pussy", "twat", "cunt", "cunts",
-      "tits", "titties", "balls", "ballsack", "nutsack", "bollocks",
-      "suck", "sucks", "sucked", "sucking", "sucky",
-      "bloody", "bugger", "buggered", "bugger off", "wank", "wanker", "tosser",
-      "prick", "pricks", "knobhead", "pillock", "plonker", "sodding",
-      "douche", "douchebag", "scumbag", "jerkoff", "jackoff", "retard", "retarded",
-      "faggot"
-    ],
-    "zh": [
-      "幹你娘", "幹妳娘", "干你娘", "幹您娘", "幹林娘", "幹你老師", "幹你老母", "幹你屁事",
-      "他媽的", "他妈的", "你媽的", "你妈的", "去你媽", "去你妈", "尼瑪", "尼玛", "馬勒戈壁",
-      "操你媽", "操你妈", "操他媽", "操他妈", "操你大爺", "操你祖宗", "肏", "操逼", "操屄",
-      "媽了個逼", "妈了个逼", "他奶奶的", "草泥馬", "草泥马", "臥槽", "卧槽", "我肏",
-      "傻逼", "傻屄", "煞筆", "屄", "雞巴", "鸡巴", "機掰", "机掰", "雞掰", "屌毛",
-      "王八蛋", "混蛋", "渾蛋", "浑蛋", "混帳", "混账", "狗屎", "狗娘養", "狗娘养",
-      "狗雜種", "狗杂种", "狗東西", "狗东西", "禽獸不如",
-      "放屁", "屁話", "屁话", "賤人", "贱人", "賤貨", "贱货", "婊", "婊子", "臭婊子",
-      "智障", "低能兒", "低能儿", "腦殘", "脑残", "幹話", "死全家", "去死吧", "不得好死",
-      "靠北", "靠腰", "靠杯", "三洨", "啥洨", "洨", "破麻", "e04", "nmsl"
-    ],
-    "yue": [
-      "屌", "屌你", "屌你老母", "屌那媽", "丟你老母", "閪", "臭閪", "西閪",
-      "好撚", "唔撚", "乜撚", "咩撚", "撚樣", "撚化", "痴撚線",
-      "冚家鏟", "冚家伶", "冚家富貴", "仆街", "撲街", "戇鳩", "戇尻", "老柒", "柒頭",
-      "死八婆", "屎忽", "on9"
-    ],
-    "ja": [
-      "くそ", "クソ", "糞", "くそったれ", "クソッタレ", "クソ野郎", "クソが", "くそが",
-      "ちくしょう", "チクショウ", "畜生", "くたばれ", "馬鹿野郎", "ばかやろう", "バカヤロー",
-      "バカヤロウ", "アホンダラ", "死ね", "ちんこ", "まんこ", "きんたま", "うんこ",
-      "ふざけんな", "ふざけるな", "ざけんな", "クソゲー", "クソくらえ", "糞喰らえ"
-    ],
-    "ko": [
-      "씨발", "씨팔", "씨빨", "쓰발", "씨발놈", "씨발년", "좆", "좆같", "좆까", "존나",
-      "개새끼", "개자식", "개소리", "개년", "개놈", "병신", "지랄", "니미", "니미럴", "썅",
-      "쌍놈", "미친놈", "미친년", "엿먹어", "ㅅㅂ", "ㅂㅅ", "ㅈㄹ"
-    ],
-    "th": [
-      "เหี้ย", "ไอ้เหี้ย", "ควย", "ไอ้ควย", "เย็ด", "สัส", "ชิบหาย", "ฉิบหาย",
-      "กระหรี่", "ระยำ", "ไอ้สัตว์", "จัญไร"
-    ],
-    "vi": [
-      "đéo", "địt", "đụ", "cặc", "lồn", "buồi", "đm", "đmm", "đcm", "dcm", "vcl", "vkl",
-      "clm", "cmn", "mẹ kiếp", "đồ chó", "khốn nạn"
-    ],
-    "es": [
-      "joder", "jodido", "jodida", "jódete", "jodete", "mierda", "mierdas",
-      "puta", "putas", "puto", "putos", "putada", "coño", "cabrón", "cabron", "cabrones",
-      "gilipollas", "gilipollez", "pendejo", "pendeja", "pendejos", "chingada", "chingado",
-      "chingar", "chinga", "pinche", "verga", "vergazo", "cojones", "carajo", "culero",
-      "maricón", "maricon", "hostia", "hostias", "hijoputa", "hijueputa", "mamón",
-      "mamada", "pelotudo", "boludo", "follar", "capullo", "malparido"
-    ],
-    "fr": [
-      "putain", "putains", "merde", "merdes", "merdique", "emmerde", "emmerder",
-      "emmerdant", "connard", "connards", "connasse", "connerie", "conneries",
-      "salope", "salopes", "salaud", "salopard", "enculé", "encule", "enculer", "enculés",
-      "foutre", "foutu", "foutue", "bordel", "chier", "chiant", "chiante", "chiotte",
-      "niquer", "nique", "niqué", "pute", "putes", "couilles", "couillon", "branleur",
-      "branlette", "ta gueule", "ferme ta gueule", "fils de pute", "va te faire foutre",
-      "batard", "bâtard", "trouduc"
-    ],
-    "de": [
-      "scheiße", "scheisse", "scheiß", "scheiss", "scheißdreck", "scheissdreck",
-      "scheißegal", "beschissen", "arsch", "arschloch", "arschlöcher", "arschgeige",
-      "fotze", "wichser", "wichsen", "verdammt", "verdammte", "fick", "ficken", "fickt",
-      "gefickt", "hurensohn", "hurensöhne", "kacke", "kack", "hure", "huren",
-      "miststück", "verpiss", "drecksau", "drecksack", "vollidiot", "affenarsch",
-      "leck mich"
-    ],
-    "pt": [
-      "caralho", "caralhos", "porra", "merda", "merdas", "foda", "fodido", "fodida",
-      "foder", "fodam", "fode", "puta", "putas", "puto", "bosta", "buceta", "cacete",
-      "corno", "vadia", "vagabunda", "desgraçado", "filho da puta", "filha da puta",
-      "fdp", "pqp", "vai se foder", "vai tomar no cu", "arrombado", "escroto", "babaca"
-    ],
-    "it": [
-      "cazzo", "cazzi", "cazzata", "cazzate", "incazzato", "incazzata", "merda", "merde",
-      "stronzo", "stronza", "stronzi", "stronzate", "coglione", "coglioni", "vaffanculo",
-      "fanculo", "affanculo", "puttana", "puttane", "troia", "troie", "minchia",
-      "bastardo", "bastarda", "culo", "figa", "porca puttana", "porco dio"
-    ],
-    "ru": [
-      "блядь", "блять", "бля", "блядский", "хуй", "хуя", "хую", "хуё", "хуйня", "хуёво",
-      "хуево", "нахуй", "похуй", "охуеть", "охуенно", "пизда", "пиздец", "пиздато",
-      "пиздеть", "ебать", "ебал", "ебан", "ебаный", "ёбаный", "ебанутый",
-      "заебал", "заебись", "наебал", "долбоеб", "долбоёб", "мудак", "мудило",
-      "сука", "суки", "сучка", "говно", "говнище", "залупа", "гандон", "пидор", "пидорас",
-      "херня", "нахер", "жопа"
-    ],
-    "uk": [
-      "хуйло", "підор", "гівно", "срака", "курва", "йобаний", "довбойоб", "дупа"
-    ],
-    "pl": [
-      "kurwa", "kurwy", "kurwie", "chuj", "chuja", "chujowy", "pierdol", "pierdolić",
-      "pierdolony", "spierdalaj", "wypierdalaj", "jebać", "jebany", "jebana", "zajebał",
-      "zajebiste", "pizda", "pizdy", "skurwysyn", "skurwiel", "gówno", "gówniany",
-      "dupa", "dupek", "ciota", "cholera jasna"
-    ],
-    "cs": [
-      "kurva", "kurvy", "hovno", "prdel", "do prdele", "píča", "píčo", "kokot", "čurák",
-      "zmrd", "jebat", "vyjebaný", "mrdat", "sráč", "svině", "debil", "kretén", "hajzl"
-    ],
-    "sk": [
-      "kurva", "piča", "kokot", "jebať", "vyjebaný", "do riti", "hovno", "sviňa",
-      "debil", "kretén", "sráč", "prdel"
-    ],
-    "hu": [
-      "bazd meg", "baszd meg", "baszki", "bassza", "baszom", "kurva", "kurvára",
-      "geci", "fasz", "faszom", "faszfej", "picsa", "picsába", "szar", "szarul",
-      "rohadt", "köcsög", "buzi", "anyád"
-    ],
-    "ro": [
-      "pula", "pulă", "pizda", "pizdă", "futu", "futu-i", "muie", "căcat", "cacat",
-      "curva", "curvă", "bulangiu", "băga-mi-aș", "dracu", "naiba"
-    ],
-    "bg": [
-      "мамка му", "ебати", "ебал", "путка", "лайно", "копеле", "гъз", "шибан", "педал"
-    ],
-    "sr": [
-      "jebem", "jebeš", "jebote", "jebi se", "jebiga", "pizda", "pizde", "kurac",
-      "kurčina", "govno", "sranje", "pička", "picka", "kurva", "šupak", "govnar"
-    ],
-    "sl": [
-      "jebi", "jebemti", "jebeš", "pizda", "kurac", "drek", "sranje", "prekleto",
-      "kurba", "pizdarija"
-    ],
-    "nl": [
-      "kut", "kutzooi", "klootzak", "klootzakken", "godverdomme", "verdomme", "godver",
-      "lul", "lullig", "hoer", "hoeren", "neuken", "geneukt", "kloten", "schijt",
-      "schijtzooi", "teringlijer", "flikker", "achterlijk"
-    ],
-    "af": [
-      "kak", "kakhuis", "poes", "fok", "fokken", "fokkit", "moerse", "bliksem jou"
-    ],
-    "sv": [
-      "jävla", "jävlar", "jävligt", "helvete", "för helvete", "fitta", "fittan",
-      "kuk", "kukhuvud", "skitstövel", "skitsnack", "förbannad", "rövhål", "knulla"
-    ],
-    "no": [
-      "faen", "faens", "faen i helvete", "helvete", "helvetes", "fitte", "kuk",
-      "drittsekk", "dritt", "forbanna", "jævla", "jævlig", "rævhøl", "knulle"
-    ],
-    "da": [
-      "for fanden", "for helvede", "helvedes", "fandeme", "skiderik", "røvhul",
-      "lorteland", "pikslikker", "kraftedeme", "møgsvin"
-    ],
-    "fi": [
-      "perkele", "vittu", "vitun", "vittumainen", "saatana", "saatanan", "paska",
-      "paskaa", "paskat", "helvetti", "helvetin", "jumalauta", "kyrpä", "mulkku",
-      "kusipää", "runkkari"
-    ],
-    "is": [
-      "helvítis", "andskotinn", "fjandinn", "fokking", "rassgat", "djöfullinn"
-    ],
-    "et": [
-      "kurat", "kuradi", "perse", "persse", "sitt", "sitta", "munn", "raisk", "pask"
-    ],
-    "lt": [
-      "šūdas", "šūdą", "bybis", "pyzda", "kurva", "eik nachui"
-    ],
-    "lv": [
-      "sūds", "sūdi", "dirsa", "pimpis", "mauka", "nolādēts"
-    ],
-    "tr": [
-      "amk", "amına", "amına koyayım", "siktir", "siktir git", "sikeyim", "sikik",
-      "sikerim", "orospu", "orospu çocuğu", "piç", "piçler", "yarrak", "göt", "götveren",
-      "amcık", "hassiktir", "yavşak", "puşt", "kahpe"
-    ],
-    "el": [
-      "μαλάκα", "μαλάκας", "μαλακία", "μαλακίες", "γαμώ", "γαμώτο", "γαμήσου",
-      "πούτσα", "πουτάνα", "μουνί", "σκατά", "αρχίδια", "καριόλης"
-    ],
-    "he": [
-      "חרא", "זונה", "בן זונה", "כוסאמק", "כוס אמק", "לך תזדיין", "מזדיין", "שרמוטה"
-    ],
-    "ar": [
-      "كسمك", "كس امك", "كس اختك", "خرا", "خرة", "شرموطة", "شرموط", "عرص", "منيوك",
-      "يلعن ابوك", "ابن الشرموطة", "زبي", "طيز"
-    ],
-    "fa": [
-      "کیر", "کونی", "جنده", "گاییدم", "تخمی", "حرومزاده", "پدرسگ"
-    ],
-    "ur": [
-      "بہنچود", "مادرچود", "چوتیا", "حرامی", "بھڑوا", "گانڈو"
-    ],
-    "hi": [
-      "चूतिया", "चूतिये", "मादरचोद", "बहनचोद", "भोसड़ी", "भोसड़ीके", "गांडू", "गांड", "लंड",
-      "हरामी", "हरामज़ादा", "भड़वा", "रंडी", "चुदाई",
-      "chutiya", "chutiye", "madarchod", "bhenchod", "bahenchod", "bhosdike", "bhosdi",
-      "gaandu", "gaand", "randi", "harami", "haramzada", "bkl", "lauda", "lund"
-    ],
-    "bn": [
-      "চুদ", "চোদা", "মাগি", "খানকি", "বাল", "হারামি", "মাদারচোদ"
-    ],
-    "ta": [
-      "புண்டை", "தேவடியா", "கூதி"
-    ],
-    "id": [
-      "bangsat", "kontol", "memek", "ngentot", "jancok", "jancuk", "bajingan",
-      "keparat", "brengsek", "tai lu"
-    ],
-    "ms": [
-      "pukimak", "puki", "kimak", "lancau", "celaka", "sial", "haramjadah"
-    ],
-    "tl": [
-      "putangina", "putang ina", "tangina", "tang ina", "gago", "gaga",
-      "ulol", "punyeta", "pakyu", "tarantado", "hayop ka", "lintik", "buwisit"
-    ],
-    "ca": [
-      "collons", "hòstia", "hostia", "merda", "cabró", "cabron", "puta", "putes",
-      "fill de puta", "cony", "malparit"
-    ]
+    "en": {
+      "damn": "verb", "damned": "adjective", "dammit": "interjection", "damnit": "interjection",
+      "goddamn": "adjective", "goddam": "adjective", "goddamnit": "interjection",
+      "goddammit": "interjection", "shit": "noun", "shits": "noun", "shite": "noun",
+      "shitty": "adjective", "shitting": "verb", "shithead": "noun", "shitshow": "noun",
+      "shitstorm": "noun", "bullshit": "noun", "dogshit": "noun", "horseshit": "noun",
+      "batshit": "adjective", "shitfaced": "adjective", "shitbag": "noun", "fuck": "verb",
+      "fucked": "adjective", "fucker": "noun", "fuckers": "noun", "fucking": "adjective",
+      "fucks": "verb", "fuckup": "noun", "fuckwit": "noun", "fucktard": "noun",
+      "fuckery": "noun", "clusterfuck": "noun", "motherfucker": "noun", "motherfuckers": "noun",
+      "motherfucking": "adjective", "wtf": "interjection", "stfu": "interjection",
+      "gtfo": "interjection", "ffs": "interjection", "fml": "interjection",
+      "lmfao": "interjection", "ass": "noun", "asses": "noun", "asshole": "noun",
+      "assholes": "noun", "asshat": "noun", "assclown": "noun", "dumbass": "noun",
+      "jackass": "noun", "smartass": "noun", "arse": "noun", "arsed": "adjective",
+      "arsehole": "noun", "arseholes": "noun", "bitch": "noun", "bitches": "noun",
+      "bitching": "verb", "bitchy": "adjective", "sonofabitch": "noun",
+      "son of a bitch": "noun", "hell": "noun", "crap": "noun", "crappy": "adjective",
+      "piss": "verb", "pissed": "adjective", "pissing": "verb", "piss off": "interjection",
+      "pissant": "noun", "bastard": "noun", "bastards": "noun", "slut": "noun", "sluts": "noun",
+      "whore": "noun", "whores": "noun", "skank": "noun", "dick": "noun", "dicks": "noun",
+      "dickhead": "noun", "dickheads": "noun", "dickwad": "noun", "dickish": "adjective",
+      "cock": "noun", "cocks": "noun", "cocksucker": "noun", "pussy": "noun", "twat": "noun",
+      "cunt": "noun", "cunts": "noun", "tits": "noun", "titties": "noun", "balls": "noun",
+      "ballsack": "noun", "nutsack": "noun", "bollocks": "noun", "suck": "verb",
+      "sucks": "verb", "sucked": "verb", "sucking": "verb", "sucky": "adjective",
+      "bloody": "adjective", "bugger": "verb", "buggered": "adjective",
+      "bugger off": "interjection", "wank": "noun", "wanker": "noun", "tosser": "noun",
+      "prick": "noun", "pricks": "noun", "knobhead": "noun", "pillock": "noun",
+      "plonker": "noun", "sodding": "adjective", "douche": "noun", "douchebag": "noun",
+      "scumbag": "noun", "jerkoff": "noun", "jackoff": "noun", "retard": "noun",
+      "retarded": "adjective", "faggot": "noun", "fuckin": "adjective",
+      "motherfuckin": "adjective", "goddamned": "adjective", "bullshitting": "verb"
+    },
+    "zh": {
+      "幹你娘": "interjection", "幹妳娘": "interjection", "干你娘": "interjection",
+      "幹您娘": "interjection", "幹林娘": "interjection", "幹你老師": "interjection",
+      "幹你老母": "interjection", "幹你屁事": "interjection", "他媽的": "adjective", "他妈的": "adjective",
+      "你媽的": "interjection", "你妈的": "interjection", "去你媽": "interjection",
+      "去你妈": "interjection", "馬勒戈壁": "interjection", "操你媽": "interjection",
+      "操你妈": "interjection", "操他媽": "interjection", "操他妈": "interjection",
+      "操你大爺": "interjection", "操你祖宗": "interjection", "肏": "verb", "操逼": "verb", "操屄": "verb",
+      "媽了個逼": "interjection", "妈了个逼": "interjection", "他奶奶的": "adjective",
+      "草泥馬": "interjection", "草泥马": "interjection", "臥槽": "interjection", "卧槽": "interjection",
+      "我肏": "interjection", "傻逼": "noun", "傻屄": "noun", "煞筆": "noun", "屄": "noun", "雞巴": "noun",
+      "鸡巴": "noun", "機掰": "adjective", "机掰": "adjective", "雞掰": "adjective", "屌毛": "noun",
+      "王八蛋": "noun", "混蛋": "noun", "渾蛋": "noun", "浑蛋": "noun", "混帳": "noun", "混账": "noun",
+      "狗屎": "noun", "狗娘養": "noun", "狗娘养": "noun", "狗雜種": "noun", "狗杂种": "noun", "狗東西": "noun",
+      "狗东西": "noun", "禽獸不如": "adjective", "放屁": "verb", "屁話": "noun", "屁话": "noun",
+      "賤人": "noun", "贱人": "noun", "賤貨": "noun", "贱货": "noun", "婊": "noun", "婊子": "noun",
+      "臭婊子": "noun", "低能兒": "noun", "低能儿": "noun", "腦殘": "noun", "脑残": "noun", "幹話": "noun",
+      "死全家": "interjection", "去死吧": "interjection", "不得好死": "interjection",
+      "靠腰": "interjection", "靠杯": "interjection", "三洨": "interjection", "啥洨": "interjection",
+      "洨": "noun", "破麻": "noun", "e04": "interjection", "nmsl": "interjection"
+    },
+    "yue": {
+      "屌": "verb", "屌你": "interjection", "屌你老母": "interjection", "屌那媽": "interjection",
+      "丟你老母": "interjection", "閪": "noun", "臭閪": "noun", "西閪": "noun", "好撚": "adverb",
+      "唔撚": "adverb", "乜撚": "interjection", "咩撚": "interjection", "撚樣": "noun", "撚化": "verb",
+      "痴撚線": "adjective", "冚家鏟": "interjection", "冚家伶": "interjection", "仆街": "noun",
+      "撲街": "noun", "戇鳩": "noun", "戇尻": "noun", "老柒": "noun", "柒頭": "noun", "死八婆": "noun",
+      "屎忽": "noun", "on9": "adjective"
+    },
+    "ja": {
+      "くそったれ": "noun", "クソッタレ": "noun", "クソ野郎": "noun", "クソが": "interjection",
+      "くそが": "interjection", "ちくしょう": "interjection", "チクショウ": "interjection",
+      "くたばれ": "interjection", "馬鹿野郎": "noun", "ばかやろう": "noun", "バカヤロー": "noun", "バカヤロウ": "noun",
+      "アホンダラ": "noun", "ちんこ": "noun", "まんこ": "noun", "きんたま": "noun", "うんこ": "noun",
+      "ふざけんな": "interjection", "ふざけるな": "interjection", "ざけんな": "interjection", "クソゲー": "noun",
+      "クソくらえ": "interjection", "糞喰らえ": "interjection", "こん畜生": "interjection"
+    },
+    "ko": {
+      "씨발": "interjection", "씨팔": "interjection", "씨빨": "interjection", "쓰발": "interjection",
+      "씨발놈": "noun", "씨발년": "noun", "좆": "noun", "좆같": "adjective", "좆까": "interjection",
+      "존나": "adverb", "개새끼": "noun", "개자식": "noun", "개놈": "noun", "병신": "noun", "지랄": "noun",
+      "니미럴": "interjection", "썅": "interjection", "쌍놈": "noun", "미친놈": "noun", "미친년": "noun",
+      "엿먹어": "interjection", "ㅅㅂ": "interjection", "ㅂㅅ": "noun", "ㅈㄹ": "noun"
+    },
+    "th": {
+      "ไอ้เหี้ย": "noun", "ควย": "noun", "ไอ้ควย": "noun", "เย็ด": "verb",
+      "ชิบหาย": "adjective", "ฉิบหาย": "adjective", "ระยำ": "adjective", "ไอ้สัตว์": "noun",
+      "จัญไร": "adjective", "ไอ้สัส": "noun"
+    },
+    "vi": {
+      "đéo": "adverb", "địt": "verb", "đụ": "verb", "cặc": "noun", "lồn": "noun",
+      "buồi": "noun", "đm": "interjection", "đmm": "interjection", "đcm": "interjection",
+      "dcm": "interjection", "vcl": "adverb", "vkl": "adverb", "clm": "interjection",
+      "cmn": "adverb", "mẹ kiếp": "interjection", "đồ chó": "noun", "khốn nạn": "adjective"
+    },
+    "es": {
+      "joder": "verb", "jodido": "adjective", "jodida": "adjective", "jódete": "interjection",
+      "jodete": "interjection", "mierda": "noun", "mierdas": "noun", "puta": "noun",
+      "putas": "noun", "puto": "adjective", "putos": "adjective", "putada": "noun",
+      "coño": "noun", "cabrón": "noun", "cabron": "noun", "cabrones": "noun",
+      "gilipollas": "noun", "gilipollez": "noun", "pendejo": "noun", "pendeja": "noun",
+      "pendejos": "noun", "chingada": "adjective", "chingado": "adjective", "chingar": "verb",
+      "chinga": "verb", "pinche": "adjective", "verga": "noun", "vergazo": "noun",
+      "cojones": "noun", "carajo": "noun", "culero": "adjective", "maricón": "noun",
+      "maricon": "noun", "hostia": "noun", "hostias": "noun", "hijoputa": "noun",
+      "hijueputa": "noun", "mamón": "noun", "mamada": "noun", "pelotudo": "noun",
+      "boludo": "noun", "follar": "verb", "capullo": "noun", "malparido": "noun"
+    },
+    "fr": {
+      "putain": "noun", "putains": "noun", "merde": "noun", "merdes": "noun",
+      "merdique": "adjective", "emmerde": "verb", "emmerder": "verb", "emmerdant": "adjective",
+      "connard": "noun", "connards": "noun", "connasse": "noun", "connerie": "noun",
+      "conneries": "noun", "salope": "noun", "salopes": "noun", "salaud": "noun",
+      "salopard": "noun", "enculé": "noun", "encule": "noun", "enculer": "verb",
+      "enculés": "noun", "foutre": "verb", "foutu": "adjective", "foutue": "adjective",
+      "bordel": "noun", "chier": "verb", "chiant": "adjective", "chiante": "adjective",
+      "chiotte": "noun", "niquer": "verb", "nique": "verb", "niqué": "adjective",
+      "pute": "noun", "putes": "noun", "couilles": "noun", "couillon": "noun",
+      "branleur": "noun", "branlette": "noun", "ta gueule": "interjection",
+      "ferme ta gueule": "interjection", "fils de pute": "noun",
+      "va te faire foutre": "interjection", "batard": "noun", "bâtard": "noun",
+      "trouduc": "noun"
+    },
+    "de": {
+      "scheiße": "noun", "scheisse": "noun", "scheiß": "adjective", "scheiss": "adjective",
+      "scheißdreck": "noun", "scheissdreck": "noun", "scheißegal": "adjective",
+      "beschissen": "adjective", "arsch": "noun", "arschloch": "noun", "arschlöcher": "noun",
+      "arschgeige": "noun", "fotze": "noun", "wichser": "noun", "wichsen": "verb",
+      "verdammt": "adverb", "verdammte": "adjective", "fick": "verb", "ficken": "verb",
+      "fickt": "verb", "gefickt": "adjective", "hurensohn": "noun", "hurensöhne": "noun",
+      "kacke": "noun", "kack": "adjective", "hure": "noun", "huren": "noun",
+      "miststück": "noun", "verpiss": "verb", "drecksau": "noun", "drecksack": "noun",
+      "vollidiot": "noun", "affenarsch": "noun", "leck mich": "interjection"
+    },
+    "pt": {
+      "caralho": "noun", "caralhos": "noun", "porra": "noun", "merda": "noun", "merdas": "noun",
+      "foda": "adjective", "fodido": "adjective", "fodida": "adjective", "foder": "verb",
+      "fodam": "verb", "fode": "verb", "puta": "noun", "putas": "noun", "puto": "adjective",
+      "bosta": "noun", "buceta": "noun", "cacete": "noun", "corno": "noun", "vadia": "noun",
+      "vagabunda": "noun", "desgraçado": "noun", "filho da puta": "noun",
+      "filha da puta": "noun", "fdp": "noun", "pqp": "interjection",
+      "vai se foder": "interjection", "vai tomar no cu": "interjection", "arrombado": "noun",
+      "escroto": "adjective", "babaca": "noun"
+    },
+    "it": {
+      "cazzo": "noun", "cazzi": "noun", "cazzata": "noun", "cazzate": "noun",
+      "incazzato": "adjective", "incazzata": "adjective", "merda": "noun", "merde": "noun",
+      "stronzo": "noun", "stronza": "noun", "stronzi": "noun", "stronzate": "noun",
+      "coglione": "noun", "coglioni": "noun", "vaffanculo": "interjection",
+      "fanculo": "interjection", "affanculo": "interjection", "puttana": "noun",
+      "puttane": "noun", "troia": "noun", "troie": "noun", "minchia": "noun",
+      "bastardo": "noun", "bastarda": "noun", "culo": "noun", "figa": "noun",
+      "porca puttana": "interjection", "porco dio": "interjection"
+    },
+    "ru": {
+      "блядь": "interjection", "блять": "interjection", "бля": "interjection",
+      "блядский": "adjective", "хуй": "noun", "хуя": "noun", "хую": "noun", "хуё": "noun",
+      "хуйня": "noun", "хуёво": "adverb", "хуево": "adverb", "нахуй": "adverb",
+      "похуй": "adverb", "охуеть": "verb", "охуенно": "adverb", "пизда": "noun",
+      "пиздец": "interjection", "пиздато": "adverb", "пиздеть": "verb", "ебать": "verb",
+      "ебал": "verb", "ебан": "adjective", "ебаный": "adjective", "ёбаный": "adjective",
+      "ебанутый": "adjective", "заебал": "verb", "заебись": "interjection", "наебал": "verb",
+      "долбоеб": "noun", "долбоёб": "noun", "мудак": "noun", "мудило": "noun", "сука": "noun",
+      "суки": "noun", "сучка": "noun", "говно": "noun", "говнище": "noun", "залупа": "noun",
+      "гандон": "noun", "пидор": "noun", "пидорас": "noun", "херня": "noun", "нахер": "adverb",
+      "жопа": "noun"
+    },
+    "uk": {
+      "хуйло": "noun", "підор": "noun", "гівно": "noun", "срака": "noun", "курва": "noun",
+      "йобаний": "adjective", "довбойоб": "noun", "дупа": "noun"
+    },
+    "pl": {
+      "kurwa": "interjection", "kurwy": "noun", "kurwie": "noun", "chuj": "noun",
+      "chuja": "noun", "chujowy": "adjective", "pierdol": "interjection", "pierdolić": "verb",
+      "pierdolony": "adjective", "spierdalaj": "interjection", "wypierdalaj": "interjection",
+      "jebać": "verb", "jebany": "adjective", "jebana": "adjective", "zajebał": "verb",
+      "zajebiste": "adjective", "pizda": "noun", "pizdy": "noun", "skurwysyn": "noun",
+      "skurwiel": "noun", "gówno": "noun", "gówniany": "adjective", "dupa": "noun",
+      "dupek": "noun", "ciota": "noun", "cholera jasna": "interjection"
+    },
+    "cs": {
+      "kurva": "interjection", "kurvy": "noun", "hovno": "noun", "prdel": "noun",
+      "do prdele": "interjection", "píča": "noun", "píčo": "noun", "kokot": "noun",
+      "čurák": "noun", "zmrd": "noun", "jebat": "verb", "vyjebaný": "adjective",
+      "mrdat": "verb", "sráč": "noun", "svině": "noun", "debil": "noun", "kretén": "noun",
+      "hajzl": "noun"
+    },
+    "sk": {
+      "kurva": "interjection", "piča": "noun", "kokot": "noun", "jebať": "verb",
+      "vyjebaný": "adjective", "do riti": "interjection", "hovno": "noun", "sviňa": "noun",
+      "debil": "noun", "kretén": "noun", "sráč": "noun", "prdel": "noun"
+    },
+    "hu": {
+      "bazd meg": "interjection", "baszd meg": "interjection", "baszki": "interjection",
+      "bassza": "interjection", "baszom": "interjection", "kurva": "adjective",
+      "kurvára": "adverb", "geci": "noun", "fasz": "noun", "faszom": "noun", "faszfej": "noun",
+      "picsa": "noun", "picsába": "interjection", "szar": "adjective", "szarul": "adverb",
+      "rohadt": "adjective", "köcsög": "noun", "buzi": "noun", "anyád": "noun"
+    },
+    "ro": {
+      "pula": "noun", "pulă": "noun", "pizda": "noun", "pizdă": "noun", "futu": "interjection",
+      "futu-i": "interjection", "muie": "noun", "căcat": "noun", "cacat": "noun",
+      "curva": "noun", "curvă": "noun", "bulangiu": "noun", "băga-mi-aș": "interjection",
+      "dracu": "interjection", "naiba": "interjection"
+    },
+    "bg": {
+      "мамка му": "interjection", "ебати": "interjection", "ебал": "verb", "путка": "noun",
+      "лайно": "noun", "копеле": "noun", "гъз": "noun", "шибан": "adjective", "педал": "noun"
+    },
+    "sr": {
+      "jebem": "verb", "jebeš": "verb", "jebote": "interjection", "jebi se": "interjection",
+      "jebiga": "interjection", "pizda": "noun", "pizde": "noun", "kurac": "noun",
+      "kurčina": "noun", "govno": "noun", "sranje": "noun", "pička": "noun", "picka": "noun",
+      "kurva": "noun", "šupak": "noun", "govnar": "noun"
+    },
+    "sl": {
+      "jebi": "interjection", "jebemti": "interjection", "jebeš": "verb", "pizda": "noun",
+      "kurac": "noun", "drek": "noun", "sranje": "noun", "prekleto": "adverb", "kurba": "noun",
+      "pizdarija": "noun"
+    },
+    "nl": {
+      "kut": "interjection", "kutzooi": "noun", "klootzak": "noun", "klootzakken": "noun",
+      "godverdomme": "interjection", "verdomme": "interjection", "godver": "interjection",
+      "lul": "noun", "lullig": "adjective", "hoer": "noun", "hoeren": "noun", "neuken": "verb",
+      "geneukt": "adjective", "kloten": "noun", "schijt": "noun", "schijtzooi": "noun",
+      "teringlijer": "noun", "flikker": "noun", "achterlijk": "adjective"
+    },
+    "af": {
+      "kak": "noun", "kakhuis": "noun", "poes": "noun", "fok": "interjection",
+      "fokken": "adjective", "fokkit": "interjection", "moerse": "adjective",
+      "bliksem jou": "interjection"
+    },
+    "sv": {
+      "jävla": "adjective", "jävlar": "interjection", "jävligt": "adverb",
+      "helvete": "interjection", "för helvete": "interjection", "fitta": "noun",
+      "fittan": "noun", "kuk": "noun", "kukhuvud": "noun", "skitstövel": "noun",
+      "skitsnack": "noun", "förbannad": "adjective", "rövhål": "noun", "knulla": "verb"
+    },
+    "no": {
+      "faen": "interjection", "faens": "adjective", "faen i helvete": "interjection",
+      "helvete": "interjection", "helvetes": "adjective", "fitte": "noun", "kuk": "noun",
+      "drittsekk": "noun", "dritt": "noun", "forbanna": "adjective", "jævla": "adjective",
+      "jævlig": "adverb", "rævhøl": "noun", "knulle": "verb"
+    },
+    "da": {
+      "for fanden": "interjection", "for helvede": "interjection", "helvedes": "adjective",
+      "fandeme": "adverb", "skiderik": "noun", "røvhul": "noun", "lorteland": "noun",
+      "pikslikker": "noun", "kraftedeme": "adverb", "møgsvin": "noun"
+    },
+    "fi": {
+      "perkele": "interjection", "vittu": "interjection", "vitun": "adjective",
+      "vittumainen": "adjective", "saatana": "interjection", "saatanan": "adjective",
+      "paska": "noun", "paskaa": "noun", "paskat": "noun", "helvetti": "interjection",
+      "helvetin": "adjective", "jumalauta": "interjection", "kyrpä": "noun", "mulkku": "noun",
+      "kusipää": "noun", "runkkari": "noun"
+    },
+    "is": {
+      "helvítis": "adjective", "andskotinn": "interjection", "fjandinn": "interjection",
+      "fokking": "adjective", "rassgat": "noun", "djöfullinn": "interjection"
+    },
+    "et": {
+      "kurat": "interjection", "kuradi": "adjective", "perse": "noun", "persse": "interjection",
+      "sitt": "noun", "sitta": "noun", "munn": "noun", "raisk": "interjection", "pask": "noun"
+    },
+    "lt": {
+      "šūdas": "noun", "šūdą": "noun", "bybis": "noun", "pyzda": "noun",
+      "kurva": "interjection", "eik nachui": "interjection"
+    },
+    "lv": {
+      "sūds": "noun", "sūdi": "noun", "dirsa": "noun", "pimpis": "noun", "mauka": "noun",
+      "nolādēts": "adjective"
+    },
+    "tr": {
+      "amk": "interjection", "amına": "interjection", "amına koyayım": "interjection",
+      "siktir": "interjection", "siktir git": "interjection", "sikeyim": "interjection",
+      "sikik": "adjective", "sikerim": "verb", "orospu": "noun", "orospu çocuğu": "noun",
+      "piç": "noun", "piçler": "noun", "yarrak": "noun", "göt": "noun", "götveren": "noun",
+      "amcık": "noun", "hassiktir": "interjection", "yavşak": "noun", "puşt": "noun",
+      "kahpe": "noun"
+    },
+    "el": {
+      "μαλάκα": "noun", "μαλάκας": "noun", "μαλακία": "noun", "μαλακίες": "noun",
+      "γαμώ": "verb", "γαμώτο": "interjection", "γαμήσου": "interjection", "πούτσα": "noun",
+      "πουτάνα": "noun", "μουνί": "noun", "σκατά": "noun", "αρχίδια": "noun", "καριόλης": "noun"
+    },
+    "he": {
+      "חרא": "noun", "זונה": "noun", "בן זונה": "noun", "כוסאמק": "interjection",
+      "כוס אמק": "interjection", "לך תזדיין": "interjection", "מזדיין": "adjective",
+      "שרמוטה": "noun"
+    },
+    "ar": {
+      "كسمك": "interjection", "كس امك": "interjection", "كس اختك": "interjection",
+      "خرا": "noun", "خرة": "noun", "شرموطة": "noun", "شرموط": "noun", "عرص": "noun",
+      "منيوك": "noun", "يلعن ابوك": "interjection", "ابن الشرموطة": "noun", "زبي": "noun",
+      "طيز": "noun"
+    },
+    "fa": {
+      "کیر": "noun", "کونی": "noun", "جنده": "noun", "گاییدم": "verb", "تخمی": "adjective",
+      "حرومزاده": "noun", "پدرسگ": "noun"
+    },
+    "ur": {
+      "بہنچود": "noun", "مادرچود": "noun", "چوتیا": "adjective", "حرامی": "noun",
+      "بھڑوا": "noun", "گانڈو": "noun"
+    },
+    "hi": {
+      "चूतिया": "adjective", "चूतिये": "adjective", "मादरचोद": "noun", "बहनचोद": "noun",
+      "भोसड़ी": "noun", "भोसड़ीके": "noun", "गांडू": "noun", "गांड": "noun", "लंड": "noun",
+      "हरामी": "noun", "हरामज़ादा": "noun", "भड़वा": "noun", "रंडी": "noun", "चुदाई": "noun",
+      "chutiya": "adjective", "chutiye": "adjective", "madarchod": "noun", "bhenchod": "noun",
+      "bahenchod": "noun", "bhosdike": "noun", "bhosdi": "noun", "gaandu": "noun",
+      "gaand": "noun", "randi": "noun", "harami": "noun", "haramzada": "noun", "bkl": "noun",
+      "lauda": "noun", "lund": "noun"
+    },
+    "bn": {
+      "চুদ": "verb", "চোদা": "verb", "মাগি": "noun", "খানকি": "noun", "বাল": "noun",
+      "হারামি": "noun", "মাদারচোদ": "noun"
+    },
+    "ta": {
+      "புண்டை": "noun", "தேவடியா": "noun", "கூதி": "noun"
+    },
+    "id": {
+      "bangsat": "noun", "kontol": "noun", "memek": "noun", "ngentot": "verb",
+      "jancok": "interjection", "jancuk": "interjection", "bajingan": "noun", "keparat": "noun",
+      "brengsek": "adjective", "tai lu": "interjection"
+    },
+    "ms": {
+      "pukimak": "noun", "puki": "noun", "kimak": "noun", "lancau": "noun",
+      "celaka": "interjection", "sial": "interjection", "haramjadah": "noun"
+    },
+    "tl": {
+      "putangina": "interjection", "putang ina": "interjection", "tangina": "interjection",
+      "tang ina": "interjection", "gago": "noun", "gaga": "noun", "ulol": "noun",
+      "punyeta": "interjection", "pakyu": "interjection", "tarantado": "noun",
+      "hayop ka": "noun", "lintik": "interjection", "buwisit": "interjection"
+    },
+    "ca": {
+      "collons": "interjection", "hòstia": "interjection", "hostia": "interjection",
+      "merda": "noun", "cabró": "noun", "cabron": "noun", "puta": "adjective", "putes": "noun",
+      "fill de puta": "noun", "cony": "noun", "malparit": "noun"
+    }
+  },
+  "compliments": {
+    "en": {
+      "noun": ["sunshine", "treasure", "legend", "cupcake", "sweetheart", "gem"],
+      "adjective": ["glorious", "wonderful", "lovely", "delightful", "splendid", "fabulous"],
+      "verb": ["love", "hug", "cheer", "praise", "welcome", "embrace"],
+      "adverb": ["wonderfully", "beautifully", "gloriously", "splendidly", "delightfully", "joyfully"],
+      "interjection": ["hooray", "bravo", "yay", "huzzah", "hurrah", "woohoo"]
+    },
+    "zh": {
+      "noun": ["天才", "天使", "英雄", "明星", "彩虹", "甜心"],
+      "adjective": ["精彩", "美好", "完美", "迷人", "神奇", "美妙"],
+      "verb": ["祝福", "珍惜", "微笑", "支持", "尊敬", "感恩"],
+      "adverb": ["漂亮地", "出色地", "愉快地", "幸福地", "甜蜜地", "深情地"],
+      "interjection": ["太棒了", "太好了", "好耶", "耶", "真棒", "恭喜"]
+    },
+    "yue": {
+      "noun": ["天才", "英雄", "寶貝", "蜜糖", "彩虹", "陽光"],
+      "adjective": ["靚", "可愛", "精彩", "美好", "完美", "出色"],
+      "verb": ["祝福", "珍惜", "擁抱", "欣賞", "讚美", "歡呼"],
+      "adverb": ["靚靚咁", "好好咁", "開開心心咁", "順順利利咁", "精彩地", "完美地"],
+      "interjection": ["好嘢", "耶", "萬歲", "加油", "恭喜", "好呀"]
+    },
+    "ja": {
+      "noun": ["天才", "宝物", "太陽", "笑顔", "英雄", "親友"],
+      "adjective": ["素晴らしい", "美しい", "優しい", "楽しい", "可愛い", "明るい"],
+      "verb": ["愛する", "祝う", "褒める", "抱きしめる", "喜ぶ", "微笑む"],
+      "adverb": ["鮮やかに", "華麗に", "完璧に", "立派に", "幸せに", "上手に"],
+      "interjection": ["やったー", "わーい", "ブラボー", "おめでとう", "最高", "乾杯"]
+    },
+    "ko": {
+      "noun": ["천재", "보물", "영웅", "햇살", "보석", "선물"],
+      "adjective": ["멋진", "훌륭한", "사랑스러운", "아름다운", "완벽한", "근사한"],
+      "verb": ["사랑하다", "칭찬하다", "응원하다", "아끼다", "축하하다", "좋아하다"],
+      "adverb": ["멋지게", "아름답게", "훌륭하게", "행복하게", "즐겁게", "완벽하게"],
+      "interjection": ["야호", "만세", "브라보", "파이팅", "최고", "좋아"]
+    },
+    "th": {
+      "noun": ["ที่รัก", "ดวงใจ", "ขวัญใจ", "สมบัติ", "อัจฉริยะ", "สายรุ้ง"],
+      "adjective": ["วิเศษ", "สวยงาม", "น่ารัก", "ยอดเยี่ยม", "งดงาม", "สดใส"],
+      "verb": ["รัก", "ชื่นชม", "กอด", "หวงแหน", "ฉลอง", "อวยพร"],
+      "adverb": ["อย่างวิเศษ", "อย่างสวยงาม", "อย่างยอดเยี่ยม", "อย่างงดงาม", "อย่างสดใส", "อย่างมีความสุข"],
+      "interjection": ["เย้", "ไชโย", "ว้าว", "เยี่ยม", "สุดยอด", "ยินดีด้วย"]
+    },
+    "vi": {
+      "noun": ["thiên tài", "báu vật", "anh hùng", "huyền thoại", "cục cưng", "ngôi sao"],
+      "adjective": ["tuyệt vời", "xinh đẹp", "đáng yêu", "hoàn hảo", "rực rỡ", "kỳ diệu"],
+      "verb": ["yêu", "ôm", "trân trọng", "khen", "ăn mừng", "ngưỡng mộ"],
+      "adverb": ["xuất sắc", "vui vẻ", "đẹp đẽ", "hạnh phúc", "duyên dáng", "ngọt ngào"],
+      "interjection": ["hoan hô", "tuyệt quá", "hay quá", "chúc mừng", "đỉnh quá", "thích quá"]
+    },
+    "es": {
+      "noun": ["tesoro", "estrella", "cariño", "leyenda", "genio", "maravilla"],
+      "adjective": ["maravilloso", "hermoso", "estupendo", "magnífico", "encantador", "espléndido"],
+      "verb": ["abrazar", "amar", "celebrar", "adorar", "aplaudir", "admirar"],
+      "adverb": ["maravillosamente", "espléndidamente", "magníficamente", "estupendamente", "felizmente", "alegremente"],
+      "interjection": ["bravo", "hurra", "olé", "yupi", "yuju", "viva"]
+    },
+    "fr": {
+      "noun": ["trésor", "bijou", "soleil", "étoile", "merveille", "génie"],
+      "adjective": ["merveilleux", "magnifique", "formidable", "charmant", "splendide", "superbe"],
+      "verb": ["adorer", "aimer", "chérir", "célébrer", "applaudir", "féliciter"],
+      "adverb": ["merveilleusement", "magnifiquement", "splendidement", "joyeusement", "gracieusement", "délicieusement"],
+      "interjection": ["bravo", "hourra", "youpi", "génial", "félicitations", "waouh"]
+    },
+    "de": {
+      "noun": ["Schatz", "Sonnenschein", "Held", "Genie", "Liebling", "Juwel"],
+      "adjective": ["großartig", "wunderbar", "bezaubernd", "zauberhaft", "liebenswert", "entzückend"],
+      "verb": ["umarmen", "lieben", "feiern", "loben", "bewundern", "schätzen"],
+      "adverb": ["herrlich", "fabelhaft", "wunderschön", "prächtig", "hervorragend", "bestens"],
+      "interjection": ["hurra", "bravo", "juhu", "prima", "klasse", "super"]
+    },
+    "pt": {
+      "noun": ["tesouro", "estrela", "lenda", "herói", "maravilha", "coração"],
+      "adjective": ["maravilhoso", "lindo", "fantástico", "esplêndido", "encantador", "magnífico"],
+      "verb": ["abraçar", "amar", "celebrar", "adorar", "aplaudir", "admirar"],
+      "adverb": ["maravilhosamente", "lindamente", "magnificamente", "brilhantemente", "alegremente", "perfeitamente"],
+      "interjection": ["oba", "uau", "bravo", "hurra", "parabéns", "viva"]
+    },
+    "it": {
+      "noun": ["tesoro", "stella", "gioiello", "leggenda", "meraviglia", "eroe"],
+      "adjective": ["meraviglioso", "splendido", "fantastico", "magnifico", "stupendo", "incantevole"],
+      "verb": ["abbracciare", "amare", "celebrare", "adorare", "applaudire", "ammirare"],
+      "adverb": ["meravigliosamente", "splendidamente", "magnificamente", "stupendamente", "felicemente", "allegramente"],
+      "interjection": ["evviva", "bravo", "urrà", "viva", "che bello", "che meraviglia"]
+    },
+    "ru": {
+      "noun": ["солнышко", "сокровище", "чудо", "радость", "чемпион", "счастье"],
+      "adjective": ["прекрасный", "замечательный", "чудесный", "великолепный", "отличный", "восхитительный"],
+      "verb": ["любить", "радовать", "восхищаться", "улыбаться", "благодарить", "праздновать"],
+      "adverb": ["прекрасно", "замечательно", "чудесно", "великолепно", "отлично", "восхитительно"],
+      "interjection": ["ура", "браво", "здорово", "круто", "класс", "супер"]
+    },
+    "uk": {
+      "noun": ["сонечко", "скарб", "диво", "радість", "чемпіон", "щастя"],
+      "adjective": ["чудовий", "прекрасний", "чарівний", "відмінний", "дивовижний", "гарний"],
+      "verb": ["любити", "радувати", "захоплюватися", "усміхатися", "дякувати", "святкувати"],
+      "adverb": ["чудово", "прекрасно", "чарівно", "відмінно", "дивовижно", "гарно"],
+      "interjection": ["ура", "браво", "круто", "клас", "супер", "вау"]
+    },
+    "pl": {
+      "noun": ["skarb", "słoneczko", "cud", "radość", "mistrz", "szczęście"],
+      "adjective": ["wspaniały", "cudowny", "piękny", "doskonały", "świetny", "znakomity"],
+      "verb": ["lubić", "podziwiać", "dziękować", "świętować", "chwalić", "doceniać"],
+      "adverb": ["wspaniale", "cudownie", "pięknie", "doskonale", "świetnie", "znakomicie"],
+      "interjection": ["hurra", "brawo", "super", "juhu", "ekstra", "rewelacja"]
+    },
+    "cs": {
+      "noun": ["poklad", "sluníčko", "zlatíčko", "šampion", "radost", "štěstí"],
+      "adjective": ["skvělý", "báječný", "úžasný", "krásný", "nádherný", "výborný"],
+      "verb": ["obdivovat", "děkovat", "oslavovat", "chválit", "těšit", "oceňovat"],
+      "adverb": ["skvěle", "báječně", "úžasně", "krásně", "nádherně", "výborně"],
+      "interjection": ["hurá", "bravo", "super", "paráda", "juchú", "jupí"]
+    },
+    "sk": {
+      "noun": ["poklad", "slniečko", "zlatko", "šampión", "radosť", "šťastie"],
+      "adjective": ["skvelý", "úžasný", "nádherný", "krásny", "výborný", "báječný"],
+      "verb": ["obdivovať", "ďakovať", "oslavovať", "chváliť", "tešiť", "oceňovať"],
+      "adverb": ["skvele", "úžasne", "nádherne", "krásne", "výborne", "báječne"],
+      "interjection": ["hurá", "bravo", "super", "paráda", "juchú", "jupí"]
+    },
+    "hu": {
+      "noun": ["kincs", "napsugár", "csoda", "öröm", "bajnok", "boldogság"],
+      "adjective": ["csodálatos", "gyönyörű", "remek", "kiváló", "nagyszerű", "fantasztikus"],
+      "verb": ["szeretni", "csodálni", "ünnepelni", "dicsérni", "mosolyogni", "örülni"],
+      "adverb": ["csodálatosan", "gyönyörűen", "remekül", "kiválóan", "nagyszerűen", "fantasztikusan"],
+      "interjection": ["hurrá", "bravó", "szuper", "juhé", "éljen", "klassz"]
+    },
+    "ro": {
+      "noun": ["comoară", "soare", "minune", "bucurie", "campion", "fericire"],
+      "adjective": ["minunat", "frumos", "splendid", "extraordinar", "superb", "fantastic"],
+      "verb": ["iubi", "admira", "mulțumi", "sărbători", "lăuda", "aprecia"],
+      "adverb": ["excelent", "perfect", "admirabil", "magnific", "încântător", "impecabil"],
+      "interjection": ["ura", "bravo", "super", "felicitări", "mișto", "formidabil"]
+    },
+    "bg": {
+      "noun": ["съкровище", "слънце", "чудо", "радост", "шампион", "щастие"],
+      "adjective": ["прекрасен", "чудесен", "страхотен", "великолепен", "красив", "възхитителен"],
+      "verb": ["обичам", "ценя", "благодаря", "празнувам", "харесвам", "хваля"],
+      "adverb": ["прекрасно", "чудесно", "страхотно", "великолепно", "красиво", "възхитително"],
+      "interjection": ["ура", "браво", "супер", "отлично", "яко", "честито"]
+    },
+    "sr": {
+      "noun": ["blago", "sunce", "čudo", "radost", "šampion", "sreća"],
+      "adjective": ["divan", "sjajan", "predivan", "lep", "izvrstan", "fantastičan"],
+      "verb": ["voleti", "slaviti", "hvaliti", "ceniti", "poštovati", "radovati"],
+      "adverb": ["divno", "sjajno", "predivno", "lepo", "izvrsno", "fantastično"],
+      "interjection": ["ura", "bravo", "super", "odlično", "živeli", "svaka čast"]
+    },
+    "sl": {
+      "noun": ["zaklad", "sonček", "čudež", "veselje", "prvak", "sreča"],
+      "adjective": ["čudovit", "lep", "odličen", "krasen", "imeniten", "fantastičen"],
+      "verb": ["spoštovati", "občudovati", "hvaliti", "praznovati", "ceniti", "veseliti"],
+      "adverb": ["čudovito", "lepo", "odlično", "krasno", "imenitno", "fantastično"],
+      "interjection": ["hura", "bravo", "super", "juhu", "zakon", "kul"]
+    },
+    "nl": {
+      "noun": ["schat", "zonnetje", "wonder", "kampioen", "vreugde", "geluk"],
+      "adjective": ["geweldig", "prachtig", "fantastisch", "heerlijk", "fijn", "lief"],
+      "verb": ["bewonderen", "waarderen", "vieren", "prijzen", "juichen", "genieten"],
+      "adverb": ["schitterend", "uitstekend", "voortreffelijk", "wonderbaarlijk", "perfect", "briljant"],
+      "interjection": ["hoera", "bravo", "top", "super", "proficiat", "joepie"]
+    },
+    "af": {
+      "noun": ["skat", "sonskyn", "wonder", "kampioen", "vreugde", "geluk"],
+      "adjective": ["wonderlik", "pragtig", "heerlik", "mooi", "fantasties", "lief"],
+      "verb": ["bewonder", "waardeer", "vier", "prys", "juig", "geniet"],
+      "adverb": ["uitstekend", "puik", "voortreflik", "skitterend", "wonderbaarlik", "briljant"],
+      "interjection": ["hoera", "bravo", "lekker", "yes", "super", "top"]
+    },
+    "sv": {
+      "noun": ["skatt", "solstråle", "underverk", "mästare", "glädje", "lycka"],
+      "adjective": ["underbar", "fantastisk", "vacker", "härlig", "strålande", "utmärkt"],
+      "verb": ["älska", "beundra", "uppskatta", "fira", "berömma", "tacka"],
+      "adverb": ["underbart", "fantastiskt", "vackert", "härligt", "fint", "storartat"],
+      "interjection": ["hurra", "bravo", "kanon", "toppen", "grattis", "jippie"]
+    },
+    "no": {
+      "noun": ["skatt", "solstråle", "vidunder", "mester", "glede", "lykke"],
+      "adjective": ["fantastisk", "vidunderlig", "vakker", "herlig", "nydelig", "flott"],
+      "verb": ["elske", "beundre", "feire", "berømme", "takke", "rose"],
+      "adverb": ["vakkert", "praktfullt", "glimrende", "utmerket", "fortreffelig", "strålende"],
+      "interjection": ["hurra", "bravo", "topp", "gratulerer", "jippi", "super"]
+    },
+    "da": {
+      "noun": ["skat", "solstråle", "vidunder", "mester", "glæde", "lykke"],
+      "adjective": ["fantastisk", "vidunderlig", "smuk", "herlig", "dejlig", "fremragende"],
+      "verb": ["elske", "beundre", "fejre", "rose", "takke", "nyde"],
+      "adverb": ["smukt", "dejligt", "herligt", "vidunderligt", "pragtfuldt", "glimrende"],
+      "interjection": ["hurra", "bravo", "super", "tillykke", "juhu", "sejt"]
+    },
+    "fi": {
+      "noun": ["aarre", "aurinko", "ihme", "ilo", "mestari", "onni"],
+      "adjective": ["ihana", "upea", "mahtava", "loistava", "hieno", "ihmeellinen"],
+      "verb": ["rakastaa", "ihailla", "kiittää", "juhlia", "kehua", "arvostaa"],
+      "adverb": ["ihanasti", "upeasti", "mahtavasti", "loistavasti", "hienosti", "ihmeellisesti"],
+      "interjection": ["hurraa", "bravo", "jee", "hienoa", "jippii", "onnittelut"]
+    },
+    "is": {
+      "noun": ["fjársjóður", "sól", "undur", "meistari", "gleði", "hamingja"],
+      "adjective": ["dásamlegur", "yndislegur", "frábær", "glæsilegur", "fallegur", "stórkostlegur"],
+      "verb": ["elska", "dá", "þakka", "fagna", "hrósa", "njóta"],
+      "adverb": ["dásamlega", "yndislega", "frábærlega", "glæsilega", "fallega", "stórkostlega"],
+      "interjection": ["húrra", "bravó", "frábært", "æðislegt", "snilld", "til hamingju"]
+    },
+    "et": {
+      "noun": ["aare", "päike", "ime", "rõõm", "meister", "õnn"],
+      "adjective": ["imeline", "ilus", "suurepärane", "vapustav", "armas", "võrratu"],
+      "verb": ["armastada", "imetleda", "tänada", "tähistada", "kiita", "hinnata"],
+      "adverb": ["imeliselt", "kaunilt", "suurepäraselt", "vapustavalt", "armsalt", "võrratult"],
+      "interjection": ["hurraa", "braavo", "tubli", "tore", "super", "jee"]
+    },
+    "lt": {
+      "noun": ["lobis", "saulutė", "stebuklas", "džiaugsmas", "čempionas", "laimė"],
+      "adjective": ["nuostabus", "puikus", "gražus", "šaunus", "mielas", "žavus"],
+      "verb": ["mylėti", "žavėtis", "dėkoti", "švęsti", "girti", "vertinti"],
+      "adverb": ["nuostabiai", "puikiai", "gražiai", "šauniai", "mielai", "žavingai"],
+      "interjection": ["valio", "bravo", "šaunu", "puiku", "super", "ura"]
+    },
+    "lv": {
+      "noun": ["dārgums", "saulīte", "brīnums", "prieks", "čempions", "laime"],
+      "adjective": ["brīnišķīgs", "lielisks", "skaists", "burvīgs", "izcils", "jauks"],
+      "verb": ["mīlēt", "apbrīnot", "svinēt", "slavēt", "novērtēt", "priecāties"],
+      "adverb": ["brīnišķīgi", "lieliski", "skaisti", "burvīgi", "izcili", "jauki"],
+      "interjection": ["urā", "bravo", "super", "malacis", "forši", "apsveicu"]
+    },
+    "tr": {
+      "noun": ["hazine", "güneş", "mucize", "sevinç", "şampiyon", "mutluluk"],
+      "adjective": ["harika", "muhteşem", "güzel", "mükemmel", "nefis", "şahane"],
+      "verb": ["sevmek", "övmek", "kutlamak", "beğenmek", "gülümsemek", "alkışlamak"],
+      "adverb": ["güzelce", "kusursuzca", "sevgiyle", "neşeyle", "zarifçe", "içtenlikle"],
+      "interjection": ["yaşasın", "bravo", "süper", "tebrikler", "oley", "efsane"]
+    },
+    "el": {
+      "noun": ["θησαυρός", "ηλιαχτίδα", "θαύμα", "χαρά", "πρωταθλητής", "ευτυχία"],
+      "adjective": ["υπέροχος", "θαυμάσιος", "εξαιρετικός", "φανταστικός", "όμορφος", "τέλειος"],
+      "verb": ["αγαπώ", "θαυμάζω", "ευχαριστώ", "γιορτάζω", "επαινώ", "εκτιμώ"],
+      "adverb": ["υπέροχα", "θαυμάσια", "εξαιρετικά", "φανταστικά", "όμορφα", "τέλεια"],
+      "interjection": ["ζήτω", "μπράβο", "εύγε", "ωραία", "σούπερ", "συγχαρητήρια"]
+    },
+    "he": {
+      "noun": ["אוצר", "שמש", "פלא", "שמחה", "כוכב", "אושר"],
+      "adjective": ["מדהים", "נהדר", "יפה", "מצוין", "מושלם", "נפלא"],
+      "verb": ["לאהוב", "להעריך", "להודות", "לחגוג", "לשבח", "לחייך"],
+      "adverb": ["להפליא", "בשמחה", "באהבה", "בחן", "בהצלחה", "בכישרון"],
+      "interjection": ["הידד", "בראבו", "יופי", "וואו", "סבבה", "כל הכבוד"]
+    },
+    "ar": {
+      "noun": ["كنز", "شمس", "جوهرة", "فرحة", "بطل", "سعادة"],
+      "adjective": ["رائع", "جميل", "ممتاز", "مدهش", "لطيف", "بديع"],
+      "verb": ["أحب", "شكر", "احتفل", "ابتسم", "أبدع", "أعجب"],
+      "adverb": ["ببراعة", "بإبداع", "بسعادة", "بحب", "بروعة", "بإتقان"],
+      "interjection": ["مرحى", "برافو", "هورا", "أحسنت", "تهانينا", "حلو"]
+    },
+    "fa": {
+      "noun": ["گنج", "خورشید", "الماس", "شادی", "قهرمان", "خوشبختی"],
+      "adjective": ["عالی", "زیبا", "قشنگ", "دلنشین", "درخشان", "باشکوه"],
+      "verb": ["ستودن", "پسندیدن", "خندیدن", "درخشیدن", "شکفتن", "رقصیدن"],
+      "adverb": ["عاشقانه", "مهربانانه", "شادمانه", "استادانه", "دوستانه", "ماهرانه"],
+      "interjection": ["آفرین", "هورا", "ایول", "تبریک", "عالیه", "دمت گرم"]
+    },
+    "ur": {
+      "noun": ["خزانہ", "سورج", "موتی", "خوشی", "ہیرا", "ستارہ"],
+      "adjective": ["شاندار", "بہترین", "خوبصورت", "زبردست", "لاجواب", "عمدہ"],
+      "verb": ["سراہنا", "مسکرانا", "چاہنا", "سنوارنا", "سجانا", "نکھارنا"],
+      "adverb": ["بخوبی", "بخوشی", "بآسانی", "بحفاظت", "بسہولت", "خوب"],
+      "interjection": ["واہ", "شاباش", "مبارکباد", "یاہو", "بہت خوب", "جیو"]
+    },
+    "hi": {
+      "noun": ["खजाना", "सूरज", "खुशी", "हीरा", "सितारा", "चैंपियन"],
+      "adjective": ["शानदार", "बेहतरीन", "खूबसूरत", "अद्भुत", "लाजवाब", "उम्दा"],
+      "verb": ["सराहना", "मुस्कुराना", "चाहना", "निखारना", "सजाना", "खिलना"],
+      "adverb": ["बखूबी", "प्रेमपूर्वक", "सहर्ष", "सादर", "सस्नेह", "खूब"],
+      "interjection": ["वाह", "शाबाश", "बधाई", "हुर्रे", "बढ़िया", "शुक्रिया"]
+    },
+    "bn": {
+      "noun": ["রত্ন", "সোনা", "আনন্দ", "সুখ", "বিস্ময়", "চ্যাম্পিয়ন"],
+      "adjective": ["চমৎকার", "সুন্দর", "দারুণ", "অসাধারণ", "মনোরম", "চমকপ্রদ"],
+      "verb": ["ভালোবাসা", "হাসা", "গাওয়া", "নাচা", "জেতা", "সাজানো"],
+      "adverb": ["সুন্দরভাবে", "চমৎকারভাবে", "অসাধারণভাবে", "দারুণভাবে", "সুচারুভাবে", "ভালোভাবে"],
+      "interjection": ["বাহ", "শাবাশ", "হুররে", "অভিনন্দন", "ধন্যবাদ", "বেশ"]
+    },
+    "ta": {
+      "noun": ["பொக்கிஷம்", "தங்கம்", "செல்லம்", "அதிசயம்", "மகிழ்ச்சி", "அன்பு"],
+      "adjective": ["அருமையான", "அழகான", "சிறப்பான", "அற்புதமான", "இனிமையான", "நல்ல"],
+      "verb": ["நேசிக்க", "பாராட்ட", "மகிழ", "சிரிக்க", "கொண்டாட", "ரசிக்க"],
+      "adverb": ["அழகாக", "அருமையாக", "சிறப்பாக", "அற்புதமாக", "இனிமையாக", "நன்றாக"],
+      "interjection": ["ஆஹா", "பலே", "சபாஷ்", "அருமை", "வாழ்த்துகள்", "ஹூரே"]
+    },
+    "id": {
+      "noun": ["permata", "mentari", "keajaiban", "kebahagiaan", "juara", "pahlawan"],
+      "adjective": ["hebat", "indah", "bagus", "menawan", "cemerlang", "sempurna"],
+      "verb": ["mencintai", "mengagumi", "menghargai", "merayakan", "memuji", "tersenyum"],
+      "adverb": ["mengagumkan", "menakjubkan", "memukau", "istimewa", "gemilang", "ceria"],
+      "interjection": ["hore", "bravo", "mantap", "keren", "asyik", "selamat"]
+    },
+    "ms": {
+      "noun": ["permata", "suria", "keajaiban", "kegembiraan", "juara", "pahlawan"],
+      "adjective": ["hebat", "indah", "cantik", "bagus", "cemerlang", "sempurna"],
+      "verb": ["menyayangi", "mengagumi", "menghargai", "meraikan", "memuji", "tersenyum"],
+      "adverb": ["mengagumkan", "menakjubkan", "memukau", "istimewa", "gemilang", "ceria"],
+      "interjection": ["hore", "bravo", "tahniah", "syabas", "wah", "mantap"]
+    },
+    "tl": {
+      "noun": ["kayamanan", "hiyas", "araw", "himala", "ligaya", "kampeon"],
+      "adjective": ["maganda", "mahusay", "masaya", "mabait", "perpekto", "marilag"],
+      "verb": ["mahalin", "hangaan", "purihin", "ngumiti", "magdiwang", "magpasalamat"],
+      "adverb": ["mabuti", "maayos", "marahan", "magiliw", "maligaya", "mahinahon"],
+      "interjection": ["yehey", "bravo", "galing", "ayos", "mabuhay", "salamat"]
+    },
+    "ca": {
+      "noun": ["tresor", "estrella", "meravella", "alegria", "campió", "joia"],
+      "adjective": ["genial", "fantàstic", "meravellós", "magnífic", "preciós", "bonic"],
+      "verb": ["estimar", "admirar", "agrair", "celebrar", "elogiar", "gaudir"],
+      "adverb": ["genialment", "fantàsticament", "meravellosament", "magníficament", "perfectament", "esplèndidament"],
+      "interjection": ["visca", "bravo", "súper", "uau", "enhorabona", "perfecte"]
+    }
   }
 }
